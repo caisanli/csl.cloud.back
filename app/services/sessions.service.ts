@@ -1,13 +1,13 @@
-import { getMongoRepository, MongoRepository } from 'typeorm'
+import { Repository, getRepository } from 'typeorm'
 import { Service } from 'typedi'
-import { Session } from 'app/entities'
+import { Session } from 'app/entities/mongodb'
 
 @Service()
 export class SessionsService {
-  repository: MongoRepository<Session>
+  repository: Repository<Session>
 
   constructor() {
-    this.repository = getMongoRepository(Session)
+    this.repository = getRepository(Session, 'mongodb')
   }
 
   async create(session: Session): Promise<Session> {
