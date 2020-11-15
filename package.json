@@ -38,6 +38,7 @@
     "koa-multer": "^1.0.2",
     "koa-router": "^8.0.8",
     "mongodb": "^3.5.7",
+    "mysql": "^2.18.1",
     "reflect-metadata": "^0.1.13",
     "routing-controllers": "^0.8.1",
     "typedi": "^0.8.0",
