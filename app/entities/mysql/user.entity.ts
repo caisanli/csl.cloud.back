@@ -1,9 +1,7 @@
-import { IsEmail, Length } from "class-validator";
 import { BaseEntity, Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { File } from "./file.entity";
 import { Folder } from "./folder.entity";
 import { Group } from "./group.entity";
-import { GroupRole } from "./groupRole.entity";
 import { Share } from "./share.entity";
 
 @Entity()
@@ -12,17 +10,19 @@ export class User extends BaseEntity {
     id: string;
 
     @Column()
-    @Length(2,10)
     name: string;
 
     @Column()
     password: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     phone: number;
 
-    @Column()
-    @IsEmail()
+    @Column({
+        nullable: true
+    })
     email: string;
 
     @OneToMany(() => File, file => file.user)
