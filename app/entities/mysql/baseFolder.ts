@@ -1,8 +1,8 @@
 import { Length } from "class-validator";
-import { BaseEntity, Column, PrimaryColumn } from "typeorm";
+import { BaseEntity, Column, PrimaryGeneratedColumn } from "typeorm";
 
 export class BaseFolder extends BaseEntity {
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @Column()
