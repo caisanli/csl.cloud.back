@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest --config .jest.config.js --no-cache --detectOpenHandles",
     "prettier": "prettier --write .",
-    "dev": "export NODE_ENV=development; nodemon --config nodemon.json",
+    "dev": "cross-env NODE_ENV=development; nodemon --config nodemon.json",
     "build": "bash ./build.sh",
     "mongo": "docker-compose -f compose.yml up -d"
   },
@@ -19,6 +19,7 @@
     "@types/koa-bodyparser": "^4.3.0",
     "@types/node": "^14.0.1",
     "@zeit/ncc": "^0.22.1",
+    "cross-env": "7.0.2",
     "jest": "^26.0.1",
     "nodemon": "^2.0.4",
     "prettier": "^2.0.5",
@@ -26,9 +27,10 @@
     "ts-jest": "^26.0.0",
     "ts-node": "^8.10.1",
     "tsconfig-paths": "^3.9.0",
-    "typescript": "^3.9.2"
+    "typescript": "3.9.2"
   },
   "dependencies": {
+    "@types/md5": "^2.2.1",
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
     "dotenv": "^8.2.0",
@@ -37,6 +39,7 @@
     "koa-logger": "^3.2.1",
     "koa-multer": "^1.0.2",
     "koa-router": "^8.0.8",
+    "md5": "^2.3.0",
     "mongodb": "^3.5.7",
     "mysql": "^2.18.1",
     "reflect-metadata": "^0.1.13",
