@@ -1,32 +1,15 @@
 import { User } from "app/entities/mysql";
 import { Service } from "typedi";
-import { DeleteResult, getRepository, Repository, UpdateResult } from "typeorm";
-
+import { BaseService } from "./base";
+import md5 from "md5";
 @Service()
-export class UserService {
-    private repository: Repository<User>
-
+export class UserService extends BaseService<User> {
     constructor() {
-        this.repository = getRepository(User, 'mysql');
+        super(User)
     }
-
-    async create(user: User): Promise<User> {
-        return this.repository.create(user);
-    }
-
-    async update(user: User): Promise<UpdateResult> {
-        return this.repository.update(user.id, user);
-    }
-
-    async remove(id: string): Promise<DeleteResult> {
-        return this.repository.delete(id);
-    }
-
-    async getById(id: string): Promise<User> {
-        return this.repository.findOne(id);
-    }
-
-    async getAll(): Promise<User[]> {
-        return this.repository.find();
+    create(user: User): Promise<User> {
+        user.password = md5(user.password);
+        const newUser = this.repository.create(user);
+        return this.repository.save(newUser);
     }
 }
