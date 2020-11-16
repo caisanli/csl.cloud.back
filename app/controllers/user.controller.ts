@@ -1,8 +1,8 @@
 import { User } from "app/entities/mysql";
 import { UserService } from "app/services";
-import { Body, JsonController, Post } from "routing-controllers";
+import { Body, Get, JsonController, Post } from "routing-controllers";
 
-@JsonController()
+@JsonController('/user')
 export class UserController {
     private userService: UserService;
 
@@ -10,10 +10,17 @@ export class UserController {
         this.userService = new UserService();
     }
 
-    @Post('/user')
+    @Post()
     async create(@Body() user: User) {
         const result = await this.userService.create(user);
         console.log('result', result);
         return '保存成功';
+    }
+
+    @Get()
+    async getAll() {
+        const result = await this.userService.getAll();
+        console.log('result', result);
+        return '获取成功';
     }
 }
