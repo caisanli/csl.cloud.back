@@ -1,6 +1,7 @@
 import { User } from "app/entities/mysql";
 import { UserService } from "app/services";
-import { Body, Get, JsonController, Post } from "routing-controllers";
+import { Body, Ctx, Delete, Get, JsonController, Param, Post, Put, QueryParam } from "routing-controllers";
+import { Context } from "vm";
 
 @JsonController('/user')
 export class UserController {
@@ -11,24 +12,46 @@ export class UserController {
     }
 
     @Post()
-    async create(@Body() user: User) {
+    async create(@Body({
+        required: true,
+        validate: true
+    }) user: User) {
         const errors = await UserController.validate(user);
-        if(errors.length) {
-
-            return ;
-        }
-        const result = await this.userService.create(user);
-        console.log('result', result);
-        return '保存成功';
+        if(errors.length) 
+            return {message: errors, code: 2};
+        await this.userService.create(user);
+        return  {message: '保存成功', code: 1};
+    }
+    
+    @Put('/:id')
+    async update(@Param('id') id: string, @Body({
+        validate: false
+    }) user: User) {
+        const oldUser = await this.userService.getById(id);
+        if(!oldUser) 
+            return {message: '当前用户不存在', code: 2}
+        const newUser: User = Object.assign({}, oldUser, user)
+        const errors = await UserController.validate(newUser);
+        if(errors.length) 
+            return {message: errors, code: 2};
+        await this.userService.update(id, newUser);
+        return  {message: '保存成功', code: 1};
     }
 
     @Get()
-    async getAll() {
+    async getAll(@Ctx() ctx: Context) {
         const result = await this.userService.getAll();
-        console.log('result', result);
-        return '获取成功';
+        return {message: '获取成功', data: result, code: 1};
     }
 
+    @Delete('/:id')
+    async remove(@Param('id') id: string) {
+        const oldUser = await this.userService.getById(id);
+        if(!oldUser) 
+            return {message: '当前用户不存在', code: 2}
+        await this.userService.remove(id);
+        return {message: '删除成功', code: 1};
+    }
     static validate(user: User): Promise<any []> {
         const { name, password, phone, email } = user;
         const errors = [], 
