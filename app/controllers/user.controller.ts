@@ -1,8 +1,8 @@
 import { User } from "app/entities/mysql";
+import { AdminAuthMiddleware } from "app/middlewares/adminAuth";
+import { UserAdminAuthMiddleware } from "app/middlewares/userAdminAuth";
 import { UserService } from "app/services";
-import { Body, Ctx, Delete, Get, JsonController, Param, Post, Put, QueryParam } from "routing-controllers";
-import { Context } from "vm";
-
+import { Body, Delete, Get, JsonController, Param, Post, Put, UseBefore } from "routing-controllers";
 @JsonController('/user')
 export class UserController {
     private userService: UserService;
@@ -12,6 +12,7 @@ export class UserController {
     }
 
     @Post()
+    @UseBefore(AdminAuthMiddleware)
     async create(@Body({
         required: true,
         validate: true
@@ -24,6 +25,7 @@ export class UserController {
     }
     
     @Put('/:id')
+    @UseBefore(AdminAuthMiddleware)
     async update(@Param('id') id: string, @Body({
         validate: false
     }) user: User) {
@@ -39,12 +41,14 @@ export class UserController {
     }
 
     @Get()
-    async getAll(@Ctx() ctx: Context) {
+    @UseBefore(UserAdminAuthMiddleware)
+    async getAll() {
         const result = await this.userService.getAll();
         return {message: '获取成功', data: result, code: 1};
     }
 
     @Delete('/:id')
+    @UseBefore(AdminAuthMiddleware)
     async remove(@Param('id') id: string) {
         const oldUser = await this.userService.getById(id);
         if(!oldUser) 

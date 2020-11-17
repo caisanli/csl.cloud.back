@@ -10,11 +10,15 @@ export class LoginController {
     constructor() {
         this.userService = new UserService();
     } 
+
     @Post('/admin')
-    async admin(@BodyParam('password') password: string) {
+    async admin(@BodyParam('password', {
+        required: true
+    }) password: string, @Ctx() ctx: Context) {
         const ADMIN_PASSWORD = 'Aa123456!';
         if(password !== ADMIN_PASSWORD) 
             return { message: '密码错误', code: 2 }
+        ctx.session.admin = { createTime: Date.now() };
         return { message: '登录成功', code: 1 };
     }
 
@@ -24,19 +28,27 @@ export class LoginController {
     }) name: string, @BodyParam('password', {
         required: true
     }) password: string, @Ctx() ctx: Context) {
-        const user = new User();
-        user.name = name;
-        user.password = md5(password);
-        const results = await this.userService.find(user);
+        const queryUser = new User();
+        queryUser.name = name;
+        queryUser.password = md5(password);
+        const results: User[] = await this.userService.find(queryUser);
         if(!results.length)
             return { message: '用户名、密码有误', code: 2 };
-        ctx.session.user = {currentTime: Date.now()};
+        let user: User = results[0];
+        delete user.password;
+        ctx.session.user = user;
         return {message: '登录成功', code: 1}
     }
 
     @Delete('/out')
     async out(@Ctx() ctx: Context) {
-        ctx.session.user = null;
+        delete ctx.session.user;
+        return {message: '退出成功', code: 1}
+    }
+
+    @Delete('/admin/out')
+    async adminOut(@Ctx() ctx: Context) {
+        delete ctx.session.admin;
         return {message: '退出成功', code: 1}
     }
 }
