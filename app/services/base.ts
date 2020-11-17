@@ -27,4 +27,8 @@ export class BaseService<T> {
     getAll(): Promise<T []> {
         return this.repository.find();
     }
+
+    find(entity: T): Promise<T []> {
+        return this.repository.find(entity);
+    }
 }
