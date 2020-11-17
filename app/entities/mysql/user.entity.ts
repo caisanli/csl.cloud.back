@@ -1,3 +1,4 @@
+import { IsDefined, Length, MinLength } from "class-validator";
 import { BaseEntity, Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { File } from "./file.entity";
 import { Folder } from "./folder.entity";
@@ -9,10 +10,16 @@ export class User extends BaseEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column()
+    @Column({
+        unique: true
+    })
+    @IsDefined()
+    @Length(2,10)
     name: string;
 
     @Column()
+    @IsDefined()
+    @MinLength(6)
     password: string;
 
     @Column({
