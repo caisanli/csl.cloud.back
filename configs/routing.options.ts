@@ -14,7 +14,7 @@ export const routingConfigs: RoutingControllersOptions = {
   // router prefix
   // e.g. api => http://hostname:port/{routePrefix}/{controller.method}
   routePrefix: '/apis',
-  classTransformer: false,
+  // classTransformer: false,
   // auto validate entity item
   // learn more: https://github.com/typestack/class-validator
   validation: true,
