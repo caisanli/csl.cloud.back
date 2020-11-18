@@ -1,4 +1,4 @@
-import { Length } from "class-validator";
+import { IsDefined, Length, MaxLength } from "class-validator";
 import { BaseEntity, Column, PrimaryGeneratedColumn } from "typeorm";
 
 export class BaseFolder extends BaseEntity {
@@ -6,9 +6,14 @@ export class BaseFolder extends BaseEntity {
     id: string;
 
     @Column()
+    @Length(2,20)
     name: string;
 
     @Column()
-    @Length(0, 150)
+    @MaxLength(150)
     description: string;
+
+    @Column()
+    @IsDefined()
+    parentId: string;
 }

@@ -1,5 +1,5 @@
-import { IsDefined, Length } from "class-validator";
-import { BaseEntity, Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { IsDefined, Length, MaxLength } from "class-validator";
+import { BaseEntity, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { GroupFile } from "./groupFile.entity";
 import { GroupFolder } from "./groupFolder.entity";
 import { GroupRole } from "./groupRole.entity";
@@ -10,14 +10,17 @@ export class Group extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({
+        unique: true
+    })
     @Length(2, 20)
     name: string;
 
     @Column()
+    @MaxLength(150)
     description: string;
 
-    @OneToOne(() => User)
+    @ManyToOne (() => User)
     @JoinColumn()
     @IsDefined()
     user: User;
