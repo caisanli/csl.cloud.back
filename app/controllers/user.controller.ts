@@ -56,6 +56,15 @@ export class UserController {
         await this.userService.remove(id);
         return {message: '删除成功', code: 1};
     }
+
+    @Get('/:id')
+    async getById(@Param('id') id: string) {
+        const user = await this.userService.getById(id);
+        if(user)
+            delete user.password;
+        return {message: '查询成功', data: user, code: 1}
+    }
+
     static validate(user: User): Promise<any []> {
         const { name, password, phone, email } = user;
         const errors = [], 
