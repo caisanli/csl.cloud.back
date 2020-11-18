@@ -1,4 +1,4 @@
-import { DeleteResult, getRepository, Repository, UpdateResult } from "typeorm";
+import { DeleteResult, FindConditions, FindManyOptions, getRepository, Repository, UpdateResult } from "typeorm";
 
 export class BaseService<T> {
     public repository: Repository<T>
@@ -28,7 +28,7 @@ export class BaseService<T> {
         return this.repository.find();
     }
 
-    find(entity: T): Promise<T []> {
-        return this.repository.find(entity);
+    find(options?: FindManyOptions<T> | FindConditions<T>): Promise<T []> {
+        return this.repository.find(options);
     }
 }
