@@ -9,17 +9,33 @@ export class FolderService extends BaseService<Folder> {
         super(Folder)
     }
 
-    getFolderByUserAndParent(userId?: string, parentId?: string, name?: string): Promise<Folder []> {
+    getFoldersByUserOrParentOrName(userId?: string, parentId?: string, name?: string): Promise<Folder []> {
         const wheres:string [] = [];
         if(userId)
-            wheres.push('group.userId = :userId');
+            wheres.push('folder.userId = :userId');
         if(parentId)
-            wheres.push('group.parentId = :parentId');
+            wheres.push('folder.parentId = :parentId');
         if(name)
-            wheres.push('group.name = :name');
+            wheres.push('folder.name = :name');
         console.log(wheres.join(' AND '));
         return this.repository.createQueryBuilder()
             .where(wheres.join(' AND '), { userId, parentId, name })
             .getMany();
+    }
+
+    async getParents(id: string): Promise<Folder []> {
+        let folders: Folder[] = [];
+        let parent = await this.repository.findOne(id);
+        id = parent ? parent.id : null;
+        while(id !== '0' && id) {
+            let folder = await this.repository.createQueryBuilder()
+                                    .where("folder.id = :id", { id })
+                                    .getOne();
+            folders.unshift(
+                folder
+            )
+            id = folder.parentId;
+        }
+        return Promise.resolve(folders);
     }
 }
