@@ -3,8 +3,8 @@ import { DeleteResult, FindConditions, FindManyOptions, getRepository, Repositor
 export class BaseService<T> {
     public repository: Repository<T>
 
-    constructor(entityClass: any) {
-        this.repository = getRepository(entityClass, 'mysql');
+    constructor(entityClass: any, type: string = 'mysql') {
+        this.repository = getRepository(entityClass, type);
     }
 
     create(entity: T): Promise<T> {
