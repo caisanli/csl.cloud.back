@@ -1,3 +1,4 @@
+import md5 from "md5";
 
 export function currentTime() {
     const dateInstance = new Date();
@@ -17,4 +18,8 @@ export function currentTime() {
 export function createRepeatName(name: string) {
     let { yearStr, monthStr, dateStr, ms } = currentTime();
     return name + '_' + yearStr + monthStr + dateStr + '_' + ms
+}
+
+export function createFileHash(name: string, size: string, modifyDate: string) {
+    return md5(name + size + modifyDate);
 }
