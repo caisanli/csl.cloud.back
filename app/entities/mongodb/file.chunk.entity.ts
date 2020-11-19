@@ -12,17 +12,14 @@ export class FileChunkEntity extends BaseEntity {
     name: string;
 
     @Column()
-    size: number;
+    size: string;
 
     @Column()
-    start: number;
+    modifyTime: string;
 
     @Column()
-    end: number;
+    chunk: string;
 
     @Column()
-    chunk: number;
-
-    @Column()
-    chunks: number;
+    chunks: string;
 }
