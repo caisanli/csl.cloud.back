@@ -20,6 +20,10 @@ export class BaseService<T> {
         return this.repository.delete(id);
     }
 
+    removeByCondition(condition: FindConditions<T>): Promise<DeleteResult> {
+        return this.repository.delete(condition);
+    }
+
     getById(id: string | number): Promise<T> {
         return this.repository.findOne(id);
     }
