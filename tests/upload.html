@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>切片上传</title>
+</head>
+<body>
+    <input type="file" name="file" onchange="fileChange(this)">
+    <script>
+        const CHUNK_SIZE = 1024 * 1024 * 5;
+        function fileChange(e) {
+            const file = e.files[0];
+            const chunks = Math.ceil(file.size / CHUNK_SIZE);
+            for(let i = 0; i < chunks; i++) {
+                let chunkFile = file.slice(i, CHUNK_SIZE);
+                
+            }
+            upload(chunks, file)
+        }
+
+        function upload(total, file, index = 0) {
+            if(index >= total) {
+                alert('上传完成')
+                return ;
+            } 
+            const formData = new FormData();
+            formData.append('name', file.name)
+            formData.append('size', file.size);
+            formData.append('chunks', total)
+            formData.append('chunk', index);
+            formData.append('modifyTime', new Date(file.lastModifiedDate).getTime())
+            formData.append('file', file.slice(index, CHUNK_SIZE))
+            fetch('http://127.0.0.1:3000/apis/file/upload', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+                headers: {
+                    'content-type': 'application/json'
+                }
+            }).then(res => {
+                upload(total, file, ++index)
+                console.log(res)
+            }).catch(err => {
+                console.log(err)
+            })
+        }
+    </script>
+</body>
+</html>
