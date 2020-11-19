@@ -9,11 +9,9 @@ import { threadId } from "worker_threads";
 @JsonController('/folder')
 @UseBefore(UserAuthMiddleware)
 export class FolderController {
-    private userService: UserService;
     private folderService: FolderService;
 
     constructor() {
-        this.userService = new UserService();
         this.folderService = new FolderService();
     }
 
@@ -97,7 +95,7 @@ export class FolderController {
     @Get('/:id')
     async getById(@Param('id') id: string) {
         const folder = await this.folderService.getById(id);
-        return { message: '删除成功', data: folder, code: 1 } 
+        return { message: '获取成功', data: folder, code: 1 } 
     }
 
     /**
@@ -115,6 +113,6 @@ export class FolderController {
             folders = await this.folderService.getFoldersByUserOrParentOrName(null, id);
             parents = await this.folderService.getParents(id);
         }
-        return { message: '获取成功', data: folders, code: 1 }
+        return { message: '获取成功', data: { folders, crumbs: parents }, code: 1 }
     }
 }

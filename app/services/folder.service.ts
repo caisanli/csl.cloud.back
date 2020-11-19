@@ -31,11 +31,13 @@ export class FolderService extends BaseService<Folder> {
             let folder = await this.repository.createQueryBuilder()
                                     .where("folder.id = :id", { id })
                                     .getOne();
-            folders.unshift(
-                folder
-            )
+            folders.unshift(folder)
             id = folder.parentId;
         }
+        const rootFolder: Folder = new Folder();
+        rootFolder.id = '0';
+        rootFolder.name = '根目录';
+        folders.unshift(rootFolder)
         return Promise.resolve(folders);
     }
 }
