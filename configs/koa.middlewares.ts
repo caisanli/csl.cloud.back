@@ -6,13 +6,14 @@ import session  from 'koa-session'
 
 export const useMiddlewares = <T extends Koa>(app: T): T => {
   Environment.identity !== 'test' && app.use(logger())
-  const SESSION_CONFIG = {
-    key: 'koa.sess',
-    maxAge: 1000 * 60 * 60 * 2 // 2个小时
-    // maxAge: 1000 * 10 // 10秒
-  }
   app.keys = ['some secret hurr'];
-  app.use(session(SESSION_CONFIG, app))
+  app.use(session({
+    key: 'koa.sess',
+    maxAge: 1000 * 60 * 60 * 2, // 2个小时
+    httpOnly: false,
+    path: '/',
+    sameSite: "none"
+  }, app))
   app.use(bodyParser())
   return app
 }
