@@ -4,6 +4,8 @@ import { Request } from 'koa';
 import multer from 'koa-multer';
 import path from 'path';
 import { createFileHash } from '.';
+import FileType from 'file-type';
+import { FileChunkEntity } from 'app/entities/mongodb';
 // 生成上传目录
 const uploadPath = path.join(__dirname, '../../', 'uploads');
 
@@ -11,9 +13,9 @@ const uploadPath = path.join(__dirname, '../../', 'uploads');
 export const fileUploadOptions = {
     storage: multer.diskStorage({
         destination: (req: Request, file: any, cb: any) => { 
-            const body = req.body;
+            const body: FileChunkEntity = req.body;
             // 根据文件名称、大小、最后修改时间生成Hash值
-            const hashVal = createFileHash(body.name, body.size, body.modifyTime);
+            const hashVal = createFileHash(body.name, body.size, body.modifyDate);
             // 用hash值生成切片的目录地址
             const chunkPath = path.join(uploadPath, hashVal, '/');
             // 检查切片目录地址是否存在 不存在就新创建
@@ -33,6 +35,21 @@ export const fileUploadOptions = {
         fileSize: 1024 * 1024 * 5 // 限制每片文件的大小
     }
 };
+
+/**
+ * 清空切片文件夹
+ * @param hash 
+ */
+export function clearChunkDir(hash: string) {
+    // 生成切片目录地址
+    const chunkPath = path.join(uploadPath, hash, '/');
+    const fileNames: string [] = fs.readdirSync(chunkPath);
+    fileNames.forEach((name: string) => {
+        let chunkFilePath = path.join(uploadPath, hash, name);
+        fs.unlinkSync(chunkFilePath);
+    });
+    fs.rmdirSync(chunkPath);
+}
 
 /**
  * 合并文件
@@ -64,4 +81,14 @@ export function mergeFile(hash: string, filePathName: string) {
         return Promise.resolve(error);
     }
     return Promise.resolve(true);
+}
+
+/**
+ * 获取文件类型
+ * @param relationPath 
+ */
+export function getFileMimeType(relationPath: string) {
+    // 获取文件路径
+    const filePath = path.join(uploadPath, relationPath)
+    return FileType.fromFile(filePath)
 }
