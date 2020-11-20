@@ -1,3 +1,4 @@
+import { IsDefined } from "class-validator";
 import { BaseEntity, Column, Entity, ObjectIdColumn } from "typeorm";
 
 @Entity()
@@ -9,17 +10,22 @@ export class FileChunkEntity extends BaseEntity {
     _id!: string;
     
     @Column()
+    @IsDefined()
     name: string;
 
     @Column()
-    size: string;
+    @IsDefined()
+    size: number;
 
     @Column()
-    modifyTime: string;
+    @IsDefined()
+    modifyDate: number;
 
     @Column()
-    chunk: string;
+    @IsDefined()
+    chunk: number;
 
     @Column()
-    chunks: string;
+    @IsDefined()
+    chunks: number;
 }

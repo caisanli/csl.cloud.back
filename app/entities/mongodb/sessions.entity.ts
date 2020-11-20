@@ -21,16 +21,16 @@ export class Session extends BaseEntity {
     @ObjectIdColumn({ name: 'id' })
     _id!: string;
 
-  @MinLength(4, { message: 'username too short' })
-  @IsNotEmpty({ message: 'must include username' })
-  username: string
+    @MinLength(4, { message: 'username too short' })
+    @IsNotEmpty({ message: 'must include username' })
+    username: string
 
-  @MinLength(10)
-  token: string
+    @MinLength(10)
+    token: string
 
-  @CreateDateColumn()
-  createdAt: Date
+    @CreateDateColumn()
+    createdAt: Date
 
-  @UpdateDateColumn()
-  updatedAt: Date
+    @UpdateDateColumn()
+    updatedAt: Date
 }

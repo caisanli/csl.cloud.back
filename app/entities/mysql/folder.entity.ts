@@ -10,9 +10,6 @@ export class Folder extends BaseFolder {
     @JoinColumn()
     user: User;
 
-    @OneToMany(() => File, file => file.folder)
-    files: File[];
-
     @ManyToMany(() => Share, share => share.folders)
     shares: Share[] 
 
