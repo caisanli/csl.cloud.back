@@ -10,7 +10,7 @@ export class HeaderMiddleware implements KoaMiddlewareInterface {
       context.request.header.origin || context.request.origin,
     )
     context.set('Access-Control-Allow-Headers', ['content-type'])
-    context.set('Access-Control-Allow-Credentials', 'true')
+    context.set('Access-Control-Allow-Credentials', true)
     context.set('Content-Type', 'application/json; charset=utf-8')
     return next()
   }
@@ -20,7 +20,6 @@ export class HeaderMiddleware implements KoaMiddlewareInterface {
 export class URLMiddleware implements KoaMiddlewareInterface {
   async use(context: any, next: (err?: any) => any): Promise<any> {
     context.request.url = decodeURIComponent(context.request.url)
-    console.log(context.request.url)
     return next()
   }
 }
