@@ -17,7 +17,6 @@ export class FolderService extends BaseService<Folder> {
             wheres.push('folder.parentId = :parentId');
         if(name)
             wheres.push('folder.name = :name');
-        console.log(wheres.join(' AND '));
         return this.repository.createQueryBuilder()
             .where(wheres.join(' AND '), { userId, parentId, name })
             .getMany();
