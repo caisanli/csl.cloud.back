@@ -17,10 +17,10 @@ export class BaseFile extends BaseEntity {
 
     @Column()
     @IsDefined()
-    type: string;
+    category: string;
     
     @Column()
-    icon: string;
+    thumbnail: string;
 
     @UpdateDateColumn()
     @IsDefined()
