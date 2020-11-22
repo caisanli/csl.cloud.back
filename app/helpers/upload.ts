@@ -6,6 +6,8 @@ import path from 'path';
 import { createFileHash } from '.';
 import FileType from 'file-type';
 import { FileChunkEntity } from 'app/entities/mongodb';
+import core from 'file-type/core';
+import fileCategory from './fileCategory';
 // 生成上传目录
 const uploadPath = path.join(__dirname, '../../', 'uploads');
 
@@ -87,8 +89,63 @@ export function mergeFile(hash: string, filePathName: string) {
  * 获取文件类型
  * @param relationPath 
  */
-export function getFileMimeType(relationPath: string) {
+export function getFileMimeType(relationPath: string): Promise<core.FileTypeResult> {
     // 获取文件路径
     const filePath = path.join(uploadPath, relationPath)
     return FileType.fromFile(filePath)
+}
+
+/**
+ * 删除文件
+ * @param relationPath 
+ */
+export function removeFile(relationPath: string) {
+    // 获取文件路径
+    const filePath = path.join(uploadPath, relationPath);
+    try {
+        fs.unlinkSync(filePath);
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+/**
+ * 获取文件后缀名
+ * @param name 
+ */
+export function getExtName(name: string): string {
+    let ext = path.extname(name);
+    return ext ? ext.replace('.', '') : '';
+}
+
+/**
+ * 获取文件类别
+ * @param name 
+ */
+export function getCategory(name: string) {
+    let ext = getExtName(name);
+    if(!ext) return '0';
+    const category = fileCategory;
+    ext = ext.toUpperCase();
+    for (const key in category) {
+        let val = category[key].find( (val: string) => val === ext)
+        if(val) return key;
+    }
+    return '0';
+}
+
+/**
+ * 拷贝文件
+ * @param targetPath 
+ * @param newPath 
+ */
+export function copyFile(targetPath: string, newPath: string) {
+    targetPath = path.join(uploadPath, targetPath)
+    newPath = path.join(uploadPath, newPath)
+    try {
+        // fs.writeFileSync(newPath, fs.readFileSync(targetPath))
+        fs.copyFileSync(targetPath, newPath);
+    } catch (error) {
+        console.log(error)
+    }
 }
