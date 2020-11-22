@@ -111,8 +111,8 @@ export class FolderController {
             folders = await this.folderService.getFoldersByUserOrParentOrName(userId, id);
         } else {
             folders = await this.folderService.getFoldersByUserOrParentOrName(null, id);
-            parents = await this.folderService.getParents(id);
         }
+        parents = await this.folderService.getParents(id);
         return { message: '获取成功', data: { folders, crumbs: parents }, code: 1 }
     }
 }
