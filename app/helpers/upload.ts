@@ -187,6 +187,14 @@ export function getFileStream(relationPath: string, opt: any): fs.ReadStream {
     return fs.createReadStream(filePath, opt);
 }
 
+/**
+ * 获取文件Buffer
+ *
+ * @export
+ * @param {string} relationPath
+ * @param {*} opt
+ * @returns {Promise<Buffer>}
+ */
 export function getFileBuffer(relationPath: string, opt: any): Promise<Buffer> {
     return new Promise((resolve, reject) => {
         const filePath = path.join(uploadPath, relationPath);
