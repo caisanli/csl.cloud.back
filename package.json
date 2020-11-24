@@ -44,6 +44,7 @@
     "koa-router": "^8.0.8",
     "koa-session": "^6.1.0",
     "md5": "^2.3.0",
+    "mime": "^2.4.6",
     "mongodb": "^3.5.7",
     "mysql": "^2.18.1",
     "reflect-metadata": "^0.1.13",
