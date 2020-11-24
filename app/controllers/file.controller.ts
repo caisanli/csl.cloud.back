@@ -7,8 +7,8 @@ import { FileChunkService } from "app/services/file.chunk.service";
 import { FilService } from "app/services/file.service";
 import { FolderService } from "app/services/folder.service";
 import { ORDER } from "app/typings";
-import { Request, Response } from "koa";
-import { Body, BodyParam, Ctx, Delete, Get, JsonController, OnUndefined, Param, Post, Put, Req, Res, Session, UploadedFile, UseBefore } from "routing-controllers";
+import { Request } from "koa";
+import { Body, BodyParam, Ctx, Delete, Get, JsonController, OnUndefined, Param, Post, Put, QueryParam, Req, Res, Session, UploadedFile, UseBefore } from "routing-controllers";
 import { Context } from "vm";
 @JsonController('/file')
 @UseBefore(UserAuthMiddleware)
@@ -29,31 +29,31 @@ export class FileController {
      * @param {string} folderId
      * @param {string} name
      * @param {string} sort
-     * @param {ORDER} order
+     * @param {ORDER} sort
      * @param {number} page
      * @param {number} num
      * @returns
      * @memberof FileController
      */
-    @Get('')
+    @Get()
     async query(
         @Session() session: any,
-        @BodyParam('folderId', {
+        @QueryParam('folderId', {
             required: true
         }) folderId: string,
-        @BodyParam('name') name: string,
-        @BodyParam('sort', {
+        @QueryParam('name') name: string,
+        @QueryParam('sort', {
             required: true,
             validate: true
         }) sort: string,
-        @BodyParam('order', {
+        @QueryParam('order', {
             required: true,
             validate: true
         }) order: ORDER,
-        @BodyParam('page', {
+        @QueryParam('page', {
             required: true
         }) page: number,
-        @BodyParam('num', {
+        @QueryParam('num', {
             required: true
         }) num: number
     ) {
@@ -147,6 +147,35 @@ export class FileController {
             await this.fileChunkService.create(bodyFile);
         }
         return { message: '上传成功', data: data, code: 1 }
+    }
+
+    /**
+     *
+     * 获取文件分片上传进度
+     * @param {string} name
+     * @param {number} size
+     * @param {number} modifyDate
+     * @returns
+     * @memberof FileController
+     */
+    @Post('/chunk/process')
+    async getChunkProcess(
+        @BodyParam('name', {
+            required: true
+        }) name: string,
+        @BodyParam('size', {
+            required: true
+        }) size: number,
+        @BodyParam('modifyDate', {
+            required: true
+        }) modifyDate: number
+    ) {
+        const query = new FileChunkEntity();
+        const hashVal = createFileHash(name, size, modifyDate);
+        query._id = hashVal;
+        query.id = hashVal;
+        const chunkFiles = await this.fileChunkService.find(query);
+        return { message: '获取成功', data: chunkFiles[0], code: 1 }
     }
 
     /**
@@ -283,8 +312,9 @@ export class FileController {
      */
     @Get('/:id')
     async getById(@Param('id') id: string) {
+        console.log('????')
         const file = await this.fileService.getById(id);
-        return { message: '获取成功', data: file, code: 2 }
+        return { message: '获取成功', data: file, code: 1 }
     }
 
     /**
@@ -296,7 +326,6 @@ export class FileController {
     async preview(
         @Param('id') id: string,
         @Req() req: Request,
-        @Res() res: Response,
         @Ctx() ctx: Context
     ) {
         try {
@@ -365,7 +394,10 @@ export class FileController {
 
     @Get('/chunk/:id')
     async getFileChunkById(@Param('id') id: string) {
-        const result = await this.fileChunkService.getById(id);
+        const query = new FileChunkEntity();
+        query._id = id;
+        query.id = id;
+        const result = await this.fileChunkService.find(query);
         return { message: '查询成功', data: result, code: 1 }
     }
 
