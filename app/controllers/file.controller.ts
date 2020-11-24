@@ -1,14 +1,15 @@
 import { FileChunkEntity } from "app/entities/mongodb";
 import { File, Folder, User } from "app/entities/mysql";
 import { createFileHash, createUUID, twoDecimal } from "app/helpers";
-import { clearChunkDir, fileUploadOptions, mergeFile, getFileMimeType, removeFile, getExtName, getCategory, copyFile } from "app/helpers/upload";
+import { clearChunkDir, fileUploadOptions, mergeFile, getFileMimeType, removeFile, getCategory, copyFile, getFileStat, getFileMime, getFileBuffer } from "app/helpers/upload";
 import { UserAuthMiddleware } from "app/middlewares/userAuth";
 import { FileChunkService } from "app/services/file.chunk.service";
 import { FilService } from "app/services/file.service";
 import { FolderService } from "app/services/folder.service";
 import { ORDER } from "app/typings";
-import session from "koa-session";
-import { Body, BodyParam, Delete, Get, JsonController, Param, Post, Put, Session, UploadedFile, UseBefore } from "routing-controllers";
+import { Request, Response } from "koa";
+import { Body, BodyParam, Ctx, Delete, Get, JsonController, OnUndefined, Param, Post, Put, Req, Res, Session, UploadedFile, UseBefore } from "routing-controllers";
+import { Context } from "vm";
 @JsonController('/file')
 @UseBefore(UserAuthMiddleware)
 export class FileController {
@@ -20,7 +21,20 @@ export class FileController {
         this.fileService = new FilService();
         this.folderService = new FolderService();
     }
-    
+
+    /**
+     *
+     * 获取文件列表
+     * @param {*} session
+     * @param {string} folderId
+     * @param {string} name
+     * @param {string} sort
+     * @param {ORDER} order
+     * @param {number} page
+     * @param {number} num
+     * @returns
+     * @memberof FileController
+     */
     @Get('')
     async query(
         @Session() session: any,
@@ -44,9 +58,9 @@ export class FileController {
         }) num: number
     ) {
         const userId = session.user.id;
-        const [ files, total ] = await this.fileService.query(userId, folderId, name, sort, order, page, num);
+        const [files, total] = await this.fileService.query(userId, folderId, name, sort, order, page, num);
         let folders: Folder[] = [];
-        if(folderId === '0') {
+        if (folderId === '0') {
             folders = await this.folderService.getFoldersByUserOrParentOrName(userId, folderId);
         } else {
             folders = await this.folderService.getFoldersByUserOrParentOrName(null, folderId);
@@ -62,7 +76,7 @@ export class FileController {
                 total
             }
         }
-        return { message: '获取成功', data: result, code: 1}
+        return { message: '获取成功', data: result, code: 1 }
     }
     /**
      * 个人文件上传
@@ -72,9 +86,9 @@ export class FileController {
     @Post("/upload")
     async upload(
         @Session() session: any,
-        @UploadedFile('file', { 
-            options: fileUploadOptions, required: true 
-        }) file: any, 
+        @UploadedFile('file', {
+            options: fileUploadOptions, required: true
+        }) file: any,
         @Body({
             required: true
         }) bodyFile: FileChunkEntity,
@@ -94,14 +108,15 @@ export class FileController {
         };
 
         // 查询文件夹
-        if(folderId !== '0')  {
+        if (folderId !== '0') {
             let folder = await this.folderService.getById(folderId);
-            if(!folder) {
+            if (!folder) {
                 clearChunkDir(hashVal);
                 return { message: '文件夹不存在', code: 2 };
             }
         }
-        if(chunk >= chunks) { // 全部分片上传完成
+        // 检测分片文件是否传完
+        if (chunk / 1 >= chunks / 1) { // 分片文件传完
             let newFileChunk = new FileChunkEntity();
             newFileChunk.id = hashVal;
             // 删除记录的切片文件
@@ -110,7 +125,7 @@ export class FileController {
             let file = new File();
             let fileId: string = createUUID();
             let diskFileName: string = fileId; // + (extname ? '.' + extname : '');
-            mergeFile(hashVal, diskFileName);
+            mergeFile(hashVal, diskFileName, name);
             file.id = fileId;
             file.name = name;
             file.size = size;
@@ -140,11 +155,11 @@ export class FileController {
      */
     @Put('/rename/:id')
     async rename(
-        @Param('id') id: string, 
+        @Param('id') id: string,
         @BodyParam('name', { required: true }) name: string
     ) {
         const file = await this.fileService.getById(id);
-        if(!file) 
+        if (!file)
             return { message: '文件不存在', code: 2 };
         file.name = name;
         file.category = getCategory(name);
@@ -159,7 +174,7 @@ export class FileController {
     @Delete('/:id')
     async delete(@Param('id') id: string) {
         const file = await this.fileService.getById(id)
-        if(!file) 
+        if (!file)
             return { message: '文件不存在', code: 2 };
         removeFile('./' + id + '_' + file.name);
         this.fileService.remove(id);
@@ -176,27 +191,27 @@ export class FileController {
     async moveTo(
         @BodyParam('ids', {
             required: true
-        }) ids: string, 
+        }) ids: string,
         @BodyParam('folderId', {
             required: true
         }) folderId: string
     ) {
         // 判断文件夹是否存在
-        if(folderId !== '0') {
+        if (folderId !== '0') {
             const folder = await this.folderService.getById(folderId);
-            if(!folder)
+            if (!folder)
                 return { message: '文件夹不存在', code: 2 }
         }
         // 判断文件是否存在
         const idArr: string[] = ids.split(',');
         let result = {
             notFound: [],
-            already:[]
+            already: []
         }
-        for(let i = 0; i < idArr.length; i++) {
+        for (let i = 0; i < idArr.length; i++) {
             const id = idArr[i];
             const file = await this.fileService.getById(id);
-            if(!file) {
+            if (!file) {
                 result.notFound.push(id);
                 continue;
             }
@@ -205,7 +220,7 @@ export class FileController {
             queryFile.folderId = folderId;
             queryFile.id = id;
             const files: File[] = await this.fileService.find(queryFile);
-            if(files.length) {
+            if (files.length) {
                 result.already.push(id);
                 continue;
             }
@@ -222,25 +237,25 @@ export class FileController {
      */
     @Post('/copy')
     async copy(
-        @BodyParam('ids') ids: string, 
+        @BodyParam('ids') ids: string,
         @BodyParam('folderId') folderId: string
     ) {
         // 判断文件夹是否存在
-        if(folderId !== '0') {
+        if (folderId !== '0') {
             const folder = await this.folderService.getById(folderId);
-            if(!folder)
+            if (!folder)
                 return { message: '文件夹不存在', code: 2 }
         }
         // 判断文件是否存在
         const idArr: string[] = ids.split(',');
         let result = {
             notFound: [],
-            already:[]
+            already: []
         }
-        for(let i = 0; i < idArr.length; i++) {
+        for (let i = 0; i < idArr.length; i++) {
             const id = idArr[i];
             const file = await this.fileService.getById(id);
-            if(!file) {
+            if (!file) {
                 result.notFound.push(id);
                 continue;
             }
@@ -249,7 +264,7 @@ export class FileController {
             queryFile.folderId = folderId;
             queryFile.id = id;
             const files: File[] = await this.fileService.find(queryFile);
-            if(files.length) {
+            if (files.length) {
                 result.already.push(id);
                 continue;
             }
@@ -272,6 +287,82 @@ export class FileController {
         return { message: '获取成功', data: file, code: 2 }
     }
 
+    /**
+     * 预览文件
+     * @param id 
+     */
+    @Get('/preview/:id')
+    @OnUndefined(206)
+    async preview(
+        @Param('id') id: string,
+        @Req() req: Request,
+        @Res() res: Response,
+        @Ctx() ctx: Context
+    ) {
+        try {
+            const file = await this.fileService.getById(id);
+            if (!file) {
+                ctx.body = ctx.body = { message: '找不到文件', code: 2 };;
+                return ;
+            }
+            const filePath = './' + id ;
+            const stat = getFileStat(filePath);
+            const range: string = req.headers.range;
+            const type = getFileMime(file.name);
+            if (!range) {
+                const fileBuffer = await getFileBuffer(filePath, { start: 0, end: stat.size - 1 });
+                ctx.type = type;
+                ctx.body = fileBuffer;
+            } else {
+                const positions = range.replace(/bytes=/, '').split('-');
+                const start = parseInt(positions[0], 10);
+                const end = positions[1] ? parseInt(positions[1], 10) : stat.size - 1;
+                const chunkSize = (end - start) + 1;
+                const fileBuffer = await getFileBuffer(filePath, { start, end });
+                const head = {
+                    'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+                    'Accept-Ranges': 'bytes',
+                    'Content-Length': chunkSize,
+                    'Content-Type': type
+                }
+                ctx.set(head);
+                ctx.body = fileBuffer;
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    /**
+     *
+     * 下载文件
+     * @param {string} id
+     * @memberof FileController
+     */
+    @Get('/download/:id')
+    @OnUndefined(200)
+    async download(
+        @Param('id') id: string,
+        @Ctx() ctx: Context
+    ) {
+        try {
+            const file = await this.fileService.getById(id);
+            if (!file) {
+                ctx.body = { message: '找不到文件', code: 2 };
+                return ;
+            }
+            const filePath = './' + id ;
+            const stat = getFileStat(filePath);
+            const type = getFileMime(file.name);
+            const fileBuffer = await getFileBuffer(filePath, { start: 0, end: stat.size - 1 });
+            ctx.type = type;
+            ctx.attachment(file.name);
+            ctx.body = fileBuffer;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     @Get('/chunk/:id')
     async getFileChunkById(@Param('id') id: string) {
         const result = await this.fileChunkService.getById(id);
@@ -286,11 +377,11 @@ export class FileController {
     }
 
     @Post('/type')
-    async getFileType(@UploadedFile('file', { 
+    async getFileType(@UploadedFile('file', {
         options: {
             dest: 'uploads/type/'
         },
-        required: true 
+        required: true
     }) file: any) {
         const result = await getFileMimeType('./type/' + file.filename)
         return { message: '获取成功', data: result, code: 1 }
