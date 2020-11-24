@@ -2,12 +2,13 @@
 import fs from 'fs';
 import { Request } from 'koa';
 import multer from 'koa-multer';
-import path from 'path';
+import path, { resolve } from 'path';
 import { createFileHash } from '.';
 import FileType from 'file-type';
 import { FileChunkEntity } from 'app/entities/mongodb';
 import core from 'file-type/core';
 import fileCategory from './fileCategory';
+import mime from 'mime';
 // 生成上传目录
 const uploadPath = path.join(__dirname, '../../', 'uploads');
 
@@ -58,7 +59,7 @@ export function clearChunkDir(hash: string) {
  * @param hash 
  * @param filePathName 
  */
-export function mergeFile(hash: string, filePathName: string) {
+export function mergeFile(hash: string, filePathName: string, fileName: string) {
     try {
         // 生成切片目录地址
         const chunkPath = path.join(uploadPath, hash, '/');
@@ -69,8 +70,8 @@ export function mergeFile(hash: string, filePathName: string) {
         // 根据新文件地址生成合成的新文件
         fs.writeFileSync(filePath, '')
         // 开始合成新文件
-        filenames.forEach(name => {
-            let chunkFilePath = path.join(uploadPath, hash, name);
+        filenames.forEach((name, i) => {
+            let chunkFilePath = path.join(uploadPath, hash, (i + 1) + '_' + fileName);
             let data = fs.readFileSync(chunkFilePath);
             // 将切片文件写入新文件
             fs.appendFileSync(filePath, data);
@@ -148,4 +149,58 @@ export function copyFile(targetPath: string, newPath: string) {
     } catch (error) {
         console.log(error)
     }
+}
+
+/**
+ *获取文件stat信息
+ * @export
+ * @param {string} relationPath
+ * @returns {fs.Stats}
+ */
+export function getFileStat(relationPath: string): fs.Stats {
+    const filePath = path.join(uploadPath, relationPath);
+    return fs.statSync(filePath);
+}
+
+/**
+ *
+ * 获取文件mime ex：'application/json'
+ * @export
+ * @param {string} relationPath
+ * @returns {string}
+ */
+export function getFileMime(relationPath: string): string | false {
+    const filePath = path.join(uploadPath, relationPath);
+    return mime.getType(filePath);
+}
+
+/**
+ * 获取文件读取流
+ *
+ * @export
+ * @param {string} relationPath
+ * @param {*} opt
+ * @returns {fs.ReadStream}
+ */
+export function getFileStream(relationPath: string, opt: any): fs.ReadStream {
+    const filePath = path.join(uploadPath, relationPath);
+    return fs.createReadStream(filePath, opt);
+}
+
+export function getFileBuffer(relationPath: string, opt: any): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        const filePath = path.join(uploadPath, relationPath);
+        const fileStream = fs.createReadStream(filePath, opt);
+        let arr = [], len = 0;
+        fileStream.on('data', chunk => {
+            len += chunk.length;
+            arr.push( Buffer.from(chunk));
+        });
+        fileStream.on('end', () => {
+            resolve(Buffer.concat(arr, len));
+        })
+        fileStream.on('error', err => {
+            reject(err)
+        })
+    })
 }
