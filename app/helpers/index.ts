@@ -1,5 +1,5 @@
 import md5 from "md5";
-import { v1 as uuidv1 } from 'uuid';
+import { v5 as uuidv5 } from 'uuid';
 /**
  * 生成当前时间信息
  */
@@ -41,20 +41,17 @@ export function createFileHash(name: string, size: number, modifyDate: number) {
  * @param decimal 
  */
 export function twoDecimal(decimal: number): number {
-    console.log('decimal：' + decimal)
     return Math.round(decimal * 100) / 100;
 }
 
 /**
- *生成UUID
+ *
+ * 生成UUID
  * @export
+ * @param {string} name
  * @returns {string}
  */
-export function createUUID():string {
-    return uuidv1({
-        node: [0x01, 0x23, 0x45, 0x67, 0x89, 0xab],
-        clockseq: 0x1234,
-        msecs: new Date().getTime(),
-        nsecs: 5678,
-    })
+export function createUUID(name: string):string {
+    const MY_NAMESPACE = 'be1e6e6c-2739-4274-8a37-f36f39612699';
+    return uuidv5(name, MY_NAMESPACE);
 }
