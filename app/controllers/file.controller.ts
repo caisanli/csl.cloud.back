@@ -1,7 +1,7 @@
 import { FileChunkEntity } from "app/entities/mongodb";
 import { File, Folder, User } from "app/entities/mysql";
 import { createFileHash, createUUID, twoDecimal } from "app/helpers";
-import { clearChunkDir, fileUploadOptions, mergeFile, getFileMimeType, removeFile, getCategory, copyFile, getFileStat, getFileMime, getFileBuffer } from "app/helpers/upload";
+import { clearChunkDir, fileUploadOptions, mergeFile, getFileMimeType, removeFile, getCategory, copyFile, getFileStat, getFileMime, getFileBuffer, zip } from "app/helpers/upload";
 import { UserAuthMiddleware } from "app/middlewares/userAuth";
 import { FileChunkService } from "app/services/file.chunk.service";
 import { FilService } from "app/services/file.service";
@@ -123,7 +123,7 @@ export class FileController {
             this.fileChunkService.removeByCondition(newFileChunk);
             // 初始化文件
             let file = new File();
-            let fileId: string = createUUID();
+            let fileId: string = createUUID(name);
             let diskFileName: string = fileId; // + (extname ? '.' + extname : '');
             mergeFile(hashVal, diskFileName, name);
             file.id = fileId;
@@ -264,7 +264,7 @@ export class FileController {
      * @param id 
      * @param folderId 
      */
-    @Post('/copy')
+    @Put('/copy')
     async copy(
         @BodyParam('ids') ids: string,
         @BodyParam('folderId') folderId: string
@@ -297,7 +297,7 @@ export class FileController {
                 result.already.push(id);
                 continue;
             }
-            const newId = createUUID();
+            const newId = createUUID(file.name);
             file.folderId = folderId;
             file.id = newId;
             copyFile('./' + id, './' + newId);
@@ -312,7 +312,6 @@ export class FileController {
      */
     @Get('/:id')
     async getById(@Param('id') id: string) {
-        console.log('????')
         const file = await this.fileService.getById(id);
         return { message: '获取成功', data: file, code: 1 }
     }
@@ -364,29 +363,47 @@ export class FileController {
 
     /**
      *
-     * 下载文件
+     * 下载文件和文件夹
      * @param {string} id
      * @memberof FileController
      */
-    @Get('/download/:id')
+    @Get('/folder/download')
     @OnUndefined(200)
     async download(
-        @Param('id') id: string,
+        @QueryParam('files') files: string,
         @Ctx() ctx: Context
     ) {
         try {
-            const file = await this.fileService.getById(id);
-            if (!file) {
-                ctx.body = { message: '找不到文件', code: 2 };
-                return ;
+            let fileIds = files ? files.split(',') : [];
+            if(!fileIds.length) 
+                return { message: '请选择文件', code: 2 }
+            
+            if(fileIds.length === 1) {
+                let id = fileIds[0];
+                const file = await this.fileService.getById(id);
+                if (!file) 
+                    return { message: '找不到文件', code: 2 };
+                
+                const filePath = './' + id ;
+                const stat = getFileStat(filePath);
+                const type = getFileMime(file.name);
+                const fileBuffer = await getFileBuffer(filePath, { start: 0, end: stat.size - 1 });
+                ctx.type = type;
+                ctx.attachment(file.name);
+                ctx.body = fileBuffer;
+            } else {
+                let files: File[] = [];
+                for(let i = 0; i < fileIds.length; i++) {
+                    let id = fileIds[i];
+                    if(!id) return ;
+                    let file = await this.fileService.getById(id);
+                    if(file) files.push(file);
+                }
+                const zipBuffer = await zip(files);
+                ctx.type = 'application/zip';
+                ctx.attachment('附件.zip');
+                ctx.body = zipBuffer;
             }
-            const filePath = './' + id ;
-            const stat = getFileStat(filePath);
-            const type = getFileMime(file.name);
-            const fileBuffer = await getFileBuffer(filePath, { start: 0, end: stat.size - 1 });
-            ctx.type = type;
-            ctx.attachment(file.name);
-            ctx.body = fileBuffer;
         } catch (error) {
             console.log(error);
         }
