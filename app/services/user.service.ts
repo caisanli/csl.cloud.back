@@ -12,4 +12,10 @@ export class UserService extends BaseService<User> {
         const newUser = this.repository.create(user);
         return this.repository.save(newUser);
     }
+
+    query(name: string): Promise<User []> {
+        const query = this.repository.createQueryBuilder();
+        if(name) query.where('user.name LIKE :name', { name })
+        return query.getMany();
+    }
 }

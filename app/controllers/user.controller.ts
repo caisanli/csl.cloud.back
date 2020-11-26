@@ -2,7 +2,8 @@ import { User } from "app/entities/mysql";
 import { AdminAuthMiddleware } from "app/middlewares/adminAuth";
 import { UserAdminAuthMiddleware } from "app/middlewares/userAdminAuth";
 import { UserService } from "app/services";
-import { Body, Delete, Get, JsonController, Param, Post, Put, UseBefore } from "routing-controllers";
+import md5 from "md5";
+import { Body, BodyParam, Delete, Get, JsonController, Param, Post, Put, QueryParam, UseBefore } from "routing-controllers";
 @JsonController('/user')
 export class UserController {
     private userService: UserService;
@@ -11,12 +12,26 @@ export class UserController {
         this.userService = new UserService();
     }
 
+    /**
+     * 创建用户
+     * @param {User} user
+     * @returns
+     * @memberof UserController
+     */
     @Post()
     @UseBefore(AdminAuthMiddleware)
-    async create(@Body({
-        required: true,
-        validate: true
-    }) user: User) {
+    async create(
+        @BodyParam('name', {
+            required: true
+        }) name: string,
+        @BodyParam('phone') phone: string,
+        @BodyParam('email') email: string
+    ) {
+        const user = new User();
+        user.name = name;
+        user.password = 'Aa123456!';
+        user.phone = phone;
+        user.email = email;
         const errors = await UserController.validate(user);
         if(errors.length) 
             return {message: errors, code: 2};
@@ -24,29 +39,88 @@ export class UserController {
         return  {message: '保存成功', code: 1};
     }
     
+    /**
+     * 更新用户信息
+     * @param {string} id
+     * @param {string} name
+     * @param {string} phone
+     * @param {string} email
+     * @returns
+     * @memberof UserController
+     */
     @Put('/:id')
     @UseBefore(AdminAuthMiddleware)
-    async update(@Param('id') id: string, @Body({
-        validate: false
-    }) user: User) {
-        const oldUser = await this.userService.getById(id);
-        if(!oldUser) 
+    async update(
+        @Param('id') id: string, 
+        @BodyParam('name', {
+            required: true
+        }) name: string,
+        @BodyParam('phone') phone: string,
+        @BodyParam('email') email: string
+    ) {
+        const user = await this.userService.getById(id);
+        if(!user) 
             return {message: '当前用户不存在', code: 2}
-        const newUser: User = Object.assign({}, oldUser, user)
-        const errors = await UserController.validate(newUser);
+        user.name = name;
+        user.phone = phone;
+        user.email = email;
+        const errors = await UserController.validate(user);
         if(errors.length) 
             return {message: errors, code: 2};
-        await this.userService.update(id, newUser);
+        await this.userService.update(id, user);
         return  {message: '保存成功', code: 1};
     }
 
+    /**
+     * 更新用户密码
+     * @param {string} oldPwd
+     * @param {string} newPwd
+     * @memberof UserController
+     */
+    @Put('/password/:id')
+    async updatePassword(
+        @Param('id') id: string,
+        @BodyParam('oldPwd', {
+            required: true
+        }) oldPwd: string,
+        @BodyParam('newPwd', {
+            required: true
+        }) newPwd: string
+    ) {
+        const user = await this.userService.getById(id);
+        if(!user) return { message: '用户不存在', code: 2 }
+        if( md5(oldPwd) !== user.password) 
+            return { message: '旧密码有误', code: 2 }
+        user.password = newPwd;
+        const errors = await UserController.validate(user);
+        if(errors.length) 
+            return { message: errors[0].message, code: 2 }
+        user.password = md5(user.password);
+        await this.userService.update(id, user);
+        return { message: '更新密码成功', code: 1 }
+    }   
+
+    /**
+     * 查询用户列表（可根据名称模糊查询
+     * @param {string} name
+     * @returns
+     * @memberof UserController
+     */
     @Get()
     @UseBefore(UserAdminAuthMiddleware)
-    async getAll() {
-        const result = await this.userService.getAll();
+    async getAll(
+        @QueryParam('name') name: string
+    ) {
+        const result = await this.userService.query(name);
         return {message: '获取成功', data: result, code: 1};
     }
-
+    
+    /**
+     * 删除用户
+     * @param {string} id
+     * @returns
+     * @memberof UserController
+     */
     @Delete('/:id')
     @UseBefore(AdminAuthMiddleware)
     async remove(@Param('id') id: string) {
@@ -57,6 +131,12 @@ export class UserController {
         return {message: '删除成功', code: 1};
     }
 
+    /**
+     * 根据ID查询用户
+     * @param {string} id
+     * @returns
+     * @memberof UserController
+     */
     @Get('/:id')
     async getById(@Param('id') id: string) {
         const user = await this.userService.getById(id);
