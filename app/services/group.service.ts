@@ -6,11 +6,11 @@ export class GroupService extends BaseService<Group> {
         super(Group)
     }
 
-    findByName(name: string): Promise<Group []> {
-        return this.repository.createQueryBuilder('group')
-            .where('group.name LIKE :name')
-            .setParameter('name', `%${ name }%`)
-            .getMany()
+    query(name?: string): Promise<Group []> {
+        const query = this.repository.createQueryBuilder('group');
+        if(name) query.where('group.name LIKE :name', { name: `%${ name }%` });
+        query.leftJoinAndSelect("group.user", "user"); // .select(["user.id", "user.name"]);
+        return query.getMany();
     }
 
     async findUsersById(id: string): Promise<User []> {
