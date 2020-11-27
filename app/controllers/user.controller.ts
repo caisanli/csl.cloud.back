@@ -34,7 +34,7 @@ export class UserController {
         user.email = email;
         const errors = await UserController.validate(user);
         if(errors.length) 
-            return {message: errors, code: 2};
+            return {message: errors[0].message, code: 2};
         await this.userService.create(user);
         return  {message: '保存成功', code: 1};
     }
@@ -64,9 +64,9 @@ export class UserController {
         user.name = name;
         user.phone = phone;
         user.email = email;
-        const errors = await UserController.validate(user);
+        const errors = await UserController.validate(user, true);
         if(errors.length) 
-            return {message: errors, code: 2};
+            return {message: errors[0].message, code: 2};
         await this.userService.update(id, user);
         return  {message: '保存成功', code: 1};
     }
@@ -87,8 +87,9 @@ export class UserController {
             required: true
         }) newPwd: string
     ) {
-        const user = await this.userService.getById(id);
+        const user = await this.userService.getPasswordUserById(id);
         if(!user) return { message: '用户不存在', code: 2 }
+        
         if( md5(oldPwd) !== user.password) 
             return { message: '旧密码有误', code: 2 }
         user.password = newPwd;
@@ -128,7 +129,7 @@ export class UserController {
         if(!oldUser) 
             return {message: '当前用户不存在', code: 2}
         await this.userService.remove(id);
-        return {message: '删除成功', code: 1};
+        return { message: '删除成功', code: 1 };
     }
 
     /**
@@ -140,12 +141,20 @@ export class UserController {
     @Get('/:id')
     async getById(@Param('id') id: string) {
         const user = await this.userService.getById(id);
-        if(user)
-            delete user.password;
         return {message: '查询成功', data: user, code: 1}
     }
 
-    static validate(user: User): Promise<any []> {
+    /**
+     * 根据ID查询带密码的用户
+     * @param id 
+     */
+    // @Get('/password/:id')
+    async getPassword(@Param('id') id: string) {
+        const user = await this.userService.getPasswordUserById(id);
+        return { message: '查询成功', data: user, code: 1 }
+    }
+
+    static validate(user: User, isUpdate?: boolean): Promise<any []> {
         const { name, password, phone, email } = user;
         const errors = [], 
             pswReg = /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? ]).*$/,
@@ -154,10 +163,10 @@ export class UserController {
         if(name.length < 2 || name.length > 20) {
             errors.push({prop: 'name', message: '用户名长度在2-20之间'})
         }
-        if(password.length < 6) {
+        if(!isUpdate && password.length < 6) {
             errors.push({prop: 'password', message: '密码长度不能小于6'})
         }
-        if(!pswReg.test(password)) {
+        if(!isUpdate && !pswReg.test(password)) {
             errors.push({prop: 'password', message: '密码至少包含1个大写字母，1个小写字母，1个数字，1个特殊字符'})
         }
         if(phone && !phoneReg.test(phone)) {
