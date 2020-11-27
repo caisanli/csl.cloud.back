@@ -17,7 +17,9 @@ export class User extends BaseEntity {
     @Length(2,10)
     name: string;
 
-    @Column()
+    @Column({
+        select: false
+    })
     @IsDefined()
     @MinLength(6)
     password: string;
