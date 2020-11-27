@@ -128,10 +128,8 @@ export class GroupController {
     @UseBefore(UserAdminAuthMiddleware)
     async getAll(@QueryParam('name') name: string) {
         let result: Group[] = [];
-        if(name)
-            result = await this.groupService.findByName(name)
-        else
-            result = await this.groupService.find();
+        result = await this.groupService.query(name);
+        console.log(result)
         return { message: '获取成功', data: result, code: 1 }
     }
     
