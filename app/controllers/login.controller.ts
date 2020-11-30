@@ -12,9 +12,12 @@ export class LoginController {
     } 
 
     @Post('/admin')
-    async admin(@BodyParam('password', {
-        required: true
-    }) password: string, @Ctx() ctx: Context) {
+    async admin(
+        @BodyParam('password', {
+            required: true
+        }) password: string, 
+        @Ctx() ctx: Context
+    ) {
         const ADMIN_PASSWORD = 'Aa123456!';
         if(password !== ADMIN_PASSWORD) 
             return { message: '密码错误', code: 2 }
@@ -23,11 +26,15 @@ export class LoginController {
     }
 
     @Post()
-    async user(@BodyParam('name', {
-        required: true
-    }) name: string, @BodyParam('password', {
-        required: true
-    }) password: string, @Ctx() ctx: Context) {
+    async user(
+        @BodyParam('name', {
+            required: true
+        }) name: string, 
+        @BodyParam('password', {
+            required: true
+        }) password: string, 
+        @Ctx() ctx: Context
+    ) {
         const queryUser = new User();
         queryUser.name = name;
         queryUser.password = md5(password);
@@ -35,9 +42,8 @@ export class LoginController {
         if(!results.length)
             return { message: '用户名、密码有误', code: 2 };
         let user: User = results[0];
-        delete user.password;
         ctx.session.user = user;
-        return {message: '登录成功', code: 1}
+        return {message: '登录成功', data: user, code: 1}
     }
 
     @Delete('/out')
