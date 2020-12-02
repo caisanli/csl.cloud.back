@@ -57,18 +57,15 @@ export class FolderController {
         @BodyParam('name', {
             required: true
         }) name: string,
-        @BodyParam('description', {
-            required: true
-        }) description: string
+        @BodyParam('description') description: string
     ) {
         const oldFolder = await this.folderService.getById(id);
         const user: User = session.user;
         if(!oldFolder)
             return  { message: '文件夹不存在', code: 2 };
-        const repeatFolder = await this.folderService.getFoldersByUserOrParentOrName(user.id, oldFolder.parentId, name);
-        if(repeatFolder.length) 
+        const [ repeatFolder ] = await this.folderService.getFoldersByUserOrParentOrName(user.id, oldFolder.parentId, name);
+        if(repeatFolder && repeatFolder.id !== id) 
             name = createRepeatName(name);
-        
         oldFolder.name = name;
         oldFolder.description = description;
         await this.folderService.update(id, oldFolder);

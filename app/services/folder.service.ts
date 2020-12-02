@@ -1,5 +1,4 @@
 import { Folder } from "app/entities/mysql";
-import { Console } from "console";
 import { Service } from "typedi";
 import { BaseService } from "./base";
 
@@ -35,6 +34,7 @@ export class FolderService extends BaseService<Folder> {
         }
         const rootFolder: Folder = new Folder();
         rootFolder.id = '0';
+        rootFolder.parentId = '-1';
         rootFolder.name = '根目录';
         folders.unshift(rootFolder)
         return Promise.resolve(folders);
