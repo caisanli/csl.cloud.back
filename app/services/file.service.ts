@@ -18,4 +18,10 @@ export class FilService extends BaseService<File> {
             .take(num)
             .getManyAndCount();    
     }
+    
+    getFileCount(folderId: string): Promise<number> {
+        return this.repository.createQueryBuilder()
+                .where('file.folderId = :folderId', { folderId })
+                .getCount();
+    }
 }

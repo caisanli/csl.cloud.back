@@ -39,4 +39,10 @@ export class FolderService extends BaseService<Folder> {
         folders.unshift(rootFolder)
         return Promise.resolve(folders);
     }
+
+    getChildrenCount(id: string):Promise<number> {
+        return this.repository.createQueryBuilder()
+            .where("folder.parentId = :id", { id })
+            .getCount();
+    }
 }
