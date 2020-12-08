@@ -41,7 +41,7 @@ export function createFileHash(name: string, size: number, modifyDate: number) {
  * @param decimal 
  */
 export function twoDecimal(decimal: number): number {
-    return Math.round(decimal * 100) / 100;
+    return Math.round(decimal * 100);
 }
 
 /**
