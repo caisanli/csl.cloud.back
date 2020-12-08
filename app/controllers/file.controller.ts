@@ -66,12 +66,13 @@ export class FileController {
             folders = await this.folderService.getFoldersByUserOrParentOrName(null, folderId);
         }
         const crumbs = await this.folderService.getParents(folderId);
+
         const result = {
             files,
             folders,
             crumbs,
             page: {
-                count: files.length,
+                count: Math.ceil(total / num),
                 page,
                 total
             }
@@ -197,16 +198,36 @@ export class FileController {
     }
 
     /**
-     * 删除文件
-     * @param id 
+     * 批量删除文件、文件夹
+     * @param ids 
      */
-    @Delete('/:id')
-    async delete(@Param('id') id: string) {
-        const file = await this.fileService.getById(id)
-        if (!file)
-            return { message: '文件不存在', code: 2 };
-        removeFile('./' + id + '_' + file.name);
-        this.fileService.remove(id);
+    @Delete('')
+    async delete(
+        @QueryParam('fileIds') fileIds: string, 
+        @QueryParam('folderIds') folderIds: string
+    ) {
+        let newFolderIds: string[] = folderIds ? folderIds.split(',') : [];
+        for(let i = 0; i < newFolderIds.length; i++) {
+            let id = newFolderIds[i];
+            if(!id) continue;
+            const folder = await this.folderService.getById(id);
+            if(!folder) continue;
+            let folderCount = await this.folderService.getChildrenCount(id);
+            if(folderCount > 0) continue;
+            let fileCount = await this.fileService.getFileCount(id);
+            if(fileCount > 0) continue;
+            await this.folderService.remove(id);
+        }
+
+        let newFileIds:string[] = fileIds ? fileIds.split(',') : [];
+        for(let i = 0; i < newFileIds.length; i++) {
+            let id = newFileIds[i];
+            if(!id) continue;
+            const file = await this.fileService.getById(id);
+            if (!file) continue;
+            removeFile('./' + id + '_' + file.name);
+            this.fileService.remove(id);
+        }
         return { message: '删除成功', code: 1 }
     }
 
