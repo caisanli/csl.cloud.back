@@ -88,7 +88,8 @@ export class FileController {
     async upload(
         @Session() session: any,
         @UploadedFile('file', {
-            options: fileUploadOptions, required: true
+            options: fileUploadOptions, 
+            required: true
         }) file: any,
         @Body({
             required: true
@@ -124,7 +125,7 @@ export class FileController {
             this.fileChunkService.removeByCondition(newFileChunk);
             // 初始化文件
             let file = new File();
-            let fileId: string = createUUID(name);
+            let fileId: string = createUUID(name + Date.now());
             let diskFileName: string = fileId; // + (extname ? '.' + extname : '');
             mergeFile(hashVal, diskFileName, name);
             file.id = fileId;
@@ -225,7 +226,7 @@ export class FileController {
             if(!id) continue;
             const file = await this.fileService.getById(id);
             if (!file) continue;
-            removeFile('./' + id + '_' + file.name);
+            removeFile('./' + id);
             this.fileService.remove(id);
         }
         return { message: '删除成功', code: 1 }
