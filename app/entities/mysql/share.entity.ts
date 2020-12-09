@@ -15,7 +15,7 @@ export class Share extends BaseEntity {
     @JoinTable()
     files: File[];
 
-    @ManyToMany(() => File, file => file.shares)
+    @ManyToMany(() => Folder, folder => folder.shares)
     @JoinTable()
     folders: Folder[];
 
