@@ -1,6 +1,5 @@
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, Tree, TreeChildren, TreeParent } from "typeorm";
+import { Entity, JoinColumn, ManyToMany, ManyToOne } from "typeorm";
 import { BaseFolder } from "./baseFolder";
-import { File } from "./file.entity";
 import { Share } from "./share.entity";
 import { User } from "./user.entity";
 

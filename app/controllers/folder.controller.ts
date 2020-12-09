@@ -1,11 +1,8 @@
 import { Folder, User } from "app/entities/mysql";
 import { createRepeatName } from "app/helpers";
 import { UserAuthMiddleware } from "app/middlewares/userAuth";
-import { UserService } from "app/services";
-import { FolderService } from "app/services/folder.service";
+import { FolderService } from "app/services";
 import { Body, BodyParam, Delete, Get, JsonController, Param, Post, Put, Session, UseBefore } from "routing-controllers";
-import { threadId } from "worker_threads";
-
 @JsonController('/folder')
 @UseBefore(UserAuthMiddleware)
 export class FolderController {

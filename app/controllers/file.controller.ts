@@ -3,9 +3,8 @@ import { File, Folder, User } from "app/entities/mysql";
 import { createFileHash, createUUID, twoDecimal } from "app/helpers";
 import { clearChunkDir, fileUploadOptions, mergeFile, getFileMimeType, removeFile, getCategory, copyFile, getFileStat, getFileMime, getFileBuffer, zip } from "app/helpers/upload";
 import { UserAuthMiddleware } from "app/middlewares/userAuth";
-import { FileChunkService } from "app/services/file.chunk.service";
-import { FilService } from "app/services/file.service";
-import { FolderService } from "app/services/folder.service";
+import { FileChunkService, FilService, FolderService } from "app/services";
+
 import { ORDER } from "app/typings";
 import { Request } from "koa";
 import { Body, BodyParam, Ctx, Delete, Get, JsonController, OnUndefined, Param, Post, Put, QueryParam, Req, Res, Session, UploadedFile, UseBefore } from "routing-controllers";

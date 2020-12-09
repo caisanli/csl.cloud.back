@@ -1,2 +1,7 @@
 export * from './sessions.service'
 export * from './user.service'
+export * from './file.chunk.service'
+export * from './file.service'
+export * from './folder.service'
+export * from './group.service'
+export * from './share.service'
