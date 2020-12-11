@@ -5,7 +5,7 @@ import { clearChunkDir, fileUploadOptions, mergeFile, getFileMimeType, removeFil
 import { UserAuthMiddleware } from "app/middlewares/userAuth";
 import { FileChunkService, FilService, FolderService } from "app/services";
 
-import { ORDER } from "app/typings";
+import { ORDER, CATEGORY } from "app/typings";
 import { Request } from "koa";
 import { Body, BodyParam, Ctx, Delete, Get, JsonController, OnUndefined, Param, Post, Put, QueryParam, Req, Res, Session, UploadedFile, UseBefore } from "routing-controllers";
 import { Context } from "vm";
@@ -37,9 +37,8 @@ export class FileController {
     @Get()
     async query(
         @Session() session: any,
-        @QueryParam('folderId', {
-            required: true
-        }) folderId: string,
+        @QueryParam('folderId') folderId: string,
+        @QueryParam('category') category: CATEGORY,
         @QueryParam('name') name: string,
         @QueryParam('sort', {
             required: true,
@@ -57,7 +56,7 @@ export class FileController {
         }) num: number
     ) {
         const userId = session.user.id;
-        const [files, total] = await this.fileService.query(userId, folderId, name, sort, order, page, num);
+        const [files, total] = await this.fileService.query(userId, name, sort, order, page, num, folderId, category);
         let folders: Folder[] = [];
         if (folderId === '0') {
             folders = await this.folderService.getFoldersByUserOrParentOrName(userId, folderId);
@@ -78,6 +77,7 @@ export class FileController {
         }
         return { message: '获取成功', data: result, code: 1 }
     }
+
     /**
      * 个人文件上传
      * @param file 
