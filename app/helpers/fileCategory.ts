@@ -1,3 +1,14 @@
+
+/** 
+ * 1：图片
+ * 2：字体
+ * 3：文档
+ * 4：压缩包
+ * 5：电子书
+ * 6：视频
+ * 7：音频
+ */
+
 export default {
     '1' : ['3FR','ARM','AVIF','BMP','CR2','CRW','CUR','DCM','DCR','DDS','ERF','EXR','FAX','FTS','G3','G4','GIF','GC','HDR','HEIC','HEIF','HRZ','ICO','IIQ','IPL','JBG','JBIG','JFI','JFIF','JIF','JNX','JP2','JPE','JPEG','JPG','JPS','K25','KDC','MAC','MAP','MEF','MNG','MRW','MTV','NEF','NRW','OEF','OTB','PAL','PALW','PAM','PBM','PCD','PCT','PCX','PDB','PEF','PES','PFM','PGM','PGX','PICON','PICT','PIX','PLASMA','PNG','PNM','PPM','PSD','PWP','RAF','RAS','RGB','RGBA','RGBO','RGF','RGF','RLA','RLE','RW2','SCT','SFW','SGI','SIX','SIXEL','SR2','SRF','SUN','SVG','TGA','TIFF','TIM','TM2','UYVY','VIFF','VIPS','VIPS','WBMP','WEBP','WMZ','WPG','X3F','XBM','XC','XCF','XPM','XV','XWD','YUV'],
     '2': ['AFM','BIN','CFF','CID','DFONT','OTF','PFA','PFB','PS','PT3','SFD','T11','T42','TTF','UFO','WOFF'],
