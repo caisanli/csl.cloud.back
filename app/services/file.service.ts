@@ -24,13 +24,16 @@ export class FilService extends BaseService<File> {
         const query = this.repository.createQueryBuilder();
         query.where('file.userId = :userId', { userId })
         if(folderId) {
-            query.where('file.folderId = :folderId', { folderId });
+            query.andWhere('file.folderId = :folderId', { folderId });
         }  
         if(category) {
-            query.where('file.category = :category', { category });
+            query.andWhere('file.category = :category', { category });
         }
         
-        if(name) query.andWhere('file.name LIKE :name', { name: `%${ name }%` });
+        if(name) {
+            query.andWhere('file.name LIKE :name', { name: `%${ name }%` });
+        }
+        
         query.addOrderBy(sort, order)
         return query.skip(num * ( page - 1 ))
             .take(num)
