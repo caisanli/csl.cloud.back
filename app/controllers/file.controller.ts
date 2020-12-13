@@ -58,13 +58,14 @@ export class FileController {
         const userId = session.user.id;
         const [files, total] = await this.fileService.query(userId, name, sort, order, page, num, folderId, category);
         let folders: Folder[] = [];
-        if (folderId === '0') {
-            folders = await this.folderService.getFoldersByUserOrParentOrName(userId, folderId);
-        } else {
-            folders = await this.folderService.getFoldersByUserOrParentOrName(null, folderId);
+        if(folderId) {
+            let queryUserId = folderId === '0' ? userId : null;
+            folders = await this.folderService.getFoldersByUserOrParentOrName(queryUserId, folderId);
         }
-        const crumbs = await this.folderService.getParents(folderId);
-
+        let crumbs:Folder[] = [];
+        if(folderId) {
+            crumbs = await this.folderService.getParents(folderId);
+        }
         const result = {
             files,
             folders,
