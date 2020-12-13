@@ -1,5 +1,5 @@
 import { IsDefined, Length, MinLength } from "class-validator";
-import { BaseEntity, Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { File } from "./file.entity";
 import { Folder } from "./folder.entity";
 import { Group } from "./group.entity";

@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 import { File } from "./file.entity";
 import { Folder } from "./folder.entity";
 import { User } from "./user.entity";
@@ -9,7 +9,19 @@ export class Share extends BaseEntity {
     id: number;
 
     @Column()
-    type: 'person' | 'link'
+    type: 'person' | 'link';
+
+    @Column()
+    name: string;
+
+    @Column()
+    count: number;
+
+    @Column()
+    userId: string;
+
+    @CreateDateColumn()
+    date: Date;
 
     @ManyToMany(() => File, file => file.shares)
     @JoinTable()

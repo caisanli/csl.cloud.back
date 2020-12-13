@@ -1,6 +1,7 @@
-import { BaseEntity, Column, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Folder } from "./folder.entity";
 
+@Entity()
 export class RecycleBin extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
