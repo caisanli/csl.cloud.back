@@ -4,7 +4,7 @@ import { UserAdminAuthMiddleware } from "app/middlewares/userAdminAuth";
 import { UserAuthMiddleware } from "app/middlewares/userAuth";
 import { UserService } from "app/services";
 import { GroupService } from "app/services/group.service";
-import { Body, BodyParam, Delete, Get, JsonController, Param, Post, Put, QueryParam, UseBefore } from "routing-controllers";
+import { Body, BodyParam, Delete, Get, JsonController, Param, Post, Put, QueryParam, Session, UseBefore } from "routing-controllers";
 
 @JsonController('/group')
 export class GroupController {
@@ -101,23 +101,15 @@ export class GroupController {
      * 根据用户ID查询所属团队
      * @param userId 
      */
-    @Get('/user/:userId')
+    @Get('/query/byUser')
     @UseBefore(UserAuthMiddleware)
-    async getByUserId(@Param('userId') userId: string) {
-        const user = await this.userService.getById(userId);
-        if(!user)
-            return { message: '当前用户不存在', code: 2 }
-        const queryGroup = new Group();
-        queryGroup.user = user;
-        let groups: Group[] = [];
-        const ownerGroups: Group[] = await this.groupService.find({ user });
-        const userGroups: Group[] = await this.groupService.find({
-            relations: ['users']
-        })
-        groups = ownerGroups.concat(userGroups);
-        console.log('ownerGroups：', ownerGroups)
-        console.log('userGroups：', userGroups)
-        return { message: '查询成功', data: groups, code: 1 }
+    async getByUser(
+        @Session() session: any
+    ) {
+        const userId = session.user.id;
+        const ownerGroups = await this.groupService.getByUserId(userId)
+        const userGroups = await this.userService.getGroups(userId)
+        return { message: '查询成功', data: ownerGroups.concat(userGroups), code: 1 }
     }
 
     /**
