@@ -28,4 +28,10 @@ export class GroupService extends BaseService<Group> {
             .getOne();
         return Promise.resolve(roles);
     }
+
+    async getByUserId(userId: string): Promise<Group []> {
+        return this.repository.createQueryBuilder('group')
+                    .where('group.userId = :userId', { userId })
+                    .getMany();
+    }
 }

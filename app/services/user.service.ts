@@ -1,4 +1,4 @@
-import { User } from "app/entities/mysql";
+import { Group, User } from "app/entities/mysql";
 import { Service } from "typedi";
 import { BaseService } from "./base";
 import md5 from "md5";
@@ -28,5 +28,13 @@ export class UserService extends BaseService<User> {
                 .addSelect("user.name")
                 .where('user.id = :id', { id })
                 .getOne();
+    }
+
+    async getGroups(id: string): Promise<Group[]> {
+        const { groups } = await this.repository.createQueryBuilder('user')
+                    .leftJoinAndSelect('user.groups', 'group')
+                    .where('user.id = :id', { id })
+                    .getOne()
+        return groups
     }
 }
