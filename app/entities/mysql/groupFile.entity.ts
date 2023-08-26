@@ -1,4 +1,4 @@
-import { Entity, ManyToOne } from "typeorm";
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { BaseFile } from "./baseFile";
 import { Group } from "./group.entity";
 
@@ -6,4 +6,7 @@ import { Group } from "./group.entity";
 export class GroupFile extends BaseFile {
     @ManyToOne(() => Group, group => group.files)
     group: Group;
+
+    @Column()
+    folderId: string;
 }
