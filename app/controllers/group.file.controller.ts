@@ -84,7 +84,7 @@ export class GroupFileController {
     let folders: GroupFolder[] = [];
     if (folderId) {
       const queryGroupId = folderId === '0' ? groupId : null;
-      folders = await this.groupFolderService.getFoldersByUserOrParentOrName(
+      folders = await this.groupFolderService.getFoldersByGroupOrParentOrName(
           queryGroupId, folderId
       )
     }

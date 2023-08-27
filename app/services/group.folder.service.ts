@@ -8,7 +8,7 @@ export class GroupFolderService extends BaseService<GroupFolder> {
         super(GroupFolder)
     }
 
-    getFoldersByUserOrParentOrName(groupId?: string, parentId?: string, name?: string): Promise<GroupFolder []> {
+    getFoldersByGroupOrParentOrName(groupId?: string, parentId?: string, name?: string): Promise<GroupFolder []> {
         const wheres:string [] = [];
         if (groupId)
             wheres.push('folder.groupId = :groupId');
