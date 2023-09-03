@@ -1,5 +1,5 @@
 import { GroupFile } from "app/entities/mysql";
-import { CATEGORY, ORDER } from "app/typings";
+import { CATEGORY, ORDER } from "app/types";
 import { Service } from "typedi";
 import { BaseService } from "./base";
 @Service()

@@ -5,7 +5,7 @@ import { clearChunkDir, fileUploadOptions, mergeFile, getFileMimeType, removeFil
 import { UserAuthMiddleware } from "app/middlewares/userAuth";
 import { FileChunkService, FilService, FolderService } from "app/services";
 
-import { ORDER, CATEGORY } from "app/typings";
+import { ORDER, CATEGORY } from "app/types";
 import { Request } from "koa";
 import { Body, BodyParam, Ctx, Delete, Get, JsonController, OnUndefined, Param, Post, Put, QueryParam, Req, Res, Session, UploadedFile, UseBefore } from "routing-controllers";
 import { Context } from "vm";

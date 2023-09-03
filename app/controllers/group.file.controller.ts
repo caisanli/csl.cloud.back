@@ -11,7 +11,7 @@ import {
 } from 'routing-controllers';
 import { UserAuthMiddleware } from '../middlewares/userAuth';
 import { FileChunkService, GroupFileService, GroupFolderService, GroupService } from '../services';
-import { CATEGORY, ORDER } from '../typings';
+import { CATEGORY, ORDER } from '../types';
 import { GroupFile, GroupFolder } from '../entities/mysql';
 import {
   copyFile,
