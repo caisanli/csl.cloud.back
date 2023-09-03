@@ -6,7 +6,7 @@ export default {
   MG_DB_TYPE: 'mongodb',
   MG_MY_HOST: 'localhost',
   MG_MY_PORT: 27017,
-  MG_USERNAME: 'root',
+  MG_USERNAME: 'caisanli',
   MG_PASSWORD: '962464',
   MG_DATABASE: 'cloud',
 
