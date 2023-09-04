@@ -22,16 +22,16 @@ export class GroupFileService extends BaseService<GroupFile> {
      */
     query(groupId: string, name: string, sort: string, order: ORDER, page: number, num: number, folderId?: string, category?: CATEGORY): Promise<[GroupFile[], number]>{
         const query = this.repository.createQueryBuilder();
-        query.where('file.userId = :userId', { groupId })
+        query.where('groupFile.groupId = :groupId', { groupId })
         if (folderId) {
-            query.andWhere('file.folderId = :folderId', { folderId });
+            query.andWhere('groupFile.folderId = :folderId', { folderId });
         }
         if (category) {
-            query.andWhere('file.category = :category', { category });
+            query.andWhere('groupFile.category = :category', { category });
         }
 
         if (name) {
-            query.andWhere('file.name LIKE :name', { name: `%${ name }%` });
+            query.andWhere('groupFile.name LIKE :name', { name: `%${ name }%` });
         }
 
         query.addOrderBy(sort, order)
