@@ -11,11 +11,11 @@ export class GroupFolderService extends BaseService<GroupFolder> {
     getFoldersByGroupOrParentOrName(groupId?: string, parentId?: string, name?: string): Promise<GroupFolder []> {
         const wheres:string [] = [];
         if (groupId)
-            wheres.push('folder.groupId = :groupId');
+            wheres.push('groupFolder.groupId = :groupId');
         if (parentId)
-            wheres.push('folder.parentId = :parentId');
+            wheres.push('groupFolder.parentId = :parentId');
         if (name)
-            wheres.push('folder.name = :name');
+            wheres.push('groupFolder.name = :name');
         return this.repository.createQueryBuilder()
             .where(wheres.join(' AND '), { groupId, parentId, name })
             .getMany();
