@@ -35,7 +35,7 @@ sudo cp -R [文件夹地址] /usr/local
 启动 `mongodb` 服务，先不用 `auth` 启动
 
 ```bazaar
-[mongodb路径]/bin/mongod --depath /usr/local/var/mongodb
+sudo [mongodb路径]/bin/mongod --dbpath /usr/local/var/mongodb
 ```
 
 [安装客户端](https://www.mongodb.com/try/download/compass)
