@@ -241,7 +241,7 @@ export class GroupFileController {
    * @param fileIds
    * @param folderIds
    */
-  @Delete('')
+  @Delete('/del')
   async delete(
       @QueryParam('fileIds') fileIds: string,
       @QueryParam('folderIds') folderIds: string
@@ -312,9 +312,11 @@ export class GroupFileController {
         result.notFound.push(id);
         continue;
       }
+      const group = await this.groupService.getById(groupId);
       // 判断文件是否已存在目标目录
       const alreadyFile = new GroupFile();
       alreadyFile.folderId = folderId;
+      alreadyFile.group = group;
       alreadyFile.id = id;
       const files = await this.groupFileService.find(alreadyFile);
       if (files.length) {
@@ -332,10 +334,15 @@ export class GroupFileController {
    * 拷贝文件
    * @param ids
    * @param folderId
+   * @param groupId
    */
+  @Put('/copy')
   async copy(
     @BodyParam('ids') ids: string,
-    @BodyParam('folderId') folderId: string
+    @BodyParam('folderId') folderId: string,
+    @BodyParam('groupId', {
+      required: true
+    }) groupId: string
   ) {
     // 校验文件夹是否存在
     if (folderId !== '0') {
@@ -353,10 +360,12 @@ export class GroupFileController {
           result.notFount.push(file);
           continue;
         }
+        const group = await this.groupService.getById(groupId);
         // 判断文件是否已存在目标目录
         const alreadyFile = new GroupFile();
         alreadyFile.folderId = folderId;
         alreadyFile.id = id;
+        alreadyFile.group = group;
         const files = await this.groupFileService.find(alreadyFile);
         if (files.length) {
           result.already.push(id);
@@ -365,6 +374,7 @@ export class GroupFileController {
         const newId = createUUID(file.name);
         file.folderId = folderId;
         file.id = newId;
+        file.group = group;
         copyFile('./' + id, './' + newId);
         await this.groupFileService.create(file);
       }
