@@ -42,7 +42,7 @@ export class GroupFolderController {
   ) {
     if (parentId !== '0') {
       const parentFolder = await this.groupFolderService.getFoldersByGroupOrParentOrName(groupId, parentId);
-      if (parentFolder) {
+      if (!parentFolder) {
         return { message: '父级文件夹不存在', code: 1 }
       }
     }
