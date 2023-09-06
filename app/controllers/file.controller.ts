@@ -26,8 +26,10 @@ export class FileController {
      * 获取文件列表
      * @param {*} session
      * @param {string} folderId
+     * @param category
      * @param {string} name
      * @param {string} sort
+     * @param order
      * @param {ORDER} sort
      * @param {number} page
      * @param {number} num
@@ -81,14 +83,16 @@ export class FileController {
 
     /**
      * 个人文件上传
-     * @param file 
-     * @param bodyFile 
+     * @param session
+     * @param file
+     * @param bodyFile
+     * @param folderId
      */
     @Post("/upload")
     async upload(
         @Session() session: any,
         @UploadedFile('file', {
-            options: fileUploadOptions, 
+            options: fileUploadOptions,
             required: true
         }) file: any,
         @Body({
@@ -182,7 +186,8 @@ export class FileController {
 
     /**
      * 更新文件
-     * @param id 
+     * @param id
+     * @param name
      */
     @Put('/rename/:id')
     async rename(
@@ -200,11 +205,12 @@ export class FileController {
 
     /**
      * 批量删除文件、文件夹
-     * @param ids 
+     * @param fileIds
+     * @param folderIds
      */
     @Delete('')
     async delete(
-        @QueryParam('fileIds') fileIds: string, 
+        @QueryParam('fileIds') fileIds: string,
         @QueryParam('folderIds') folderIds: string
     ) {
         let newFolderIds: string[] = folderIds ? folderIds.split(',') : [];
@@ -227,16 +233,15 @@ export class FileController {
             const file = await this.fileService.getById(id);
             if (!file) continue;
             removeFile('./' + id);
-            this.fileService.remove(id);
+            await this.fileService.remove(id);
         }
         return { message: '删除成功', code: 1 }
     }
 
     /**
      * 移动文件
-     * @param session 
-     * @param ids 
-     * @param folderId 
+     * @param ids
+     * @param folderId
      */
     @Put('/move')
     async moveTo(
@@ -283,8 +288,8 @@ export class FileController {
 
     /**
      * 拷贝文件
-     * @param id 
-     * @param folderId 
+     * @param ids
+     * @param folderId
      */
     @Put('/copy')
     async copy(
@@ -330,7 +335,7 @@ export class FileController {
 
     /**
      * 获取文件信息
-     * @param id 
+     * @param id
      */
     @Get('/:id')
     async getById(@Param('id') id: string) {
@@ -340,7 +345,9 @@ export class FileController {
 
     /**
      * 预览文件
-     * @param id 
+     * @param id
+     * @param req
+     * @param ctx
      */
     @Get('/preview/:id')
     @OnUndefined(206)
@@ -386,8 +393,9 @@ export class FileController {
     /**
      *
      * 下载文件和文件夹
-     * @param {string} id
      * @memberof FileController
+     * @param files
+     * @param ctx
      */
     @Get('/folder/download')
     @OnUndefined(200)
@@ -397,15 +405,15 @@ export class FileController {
     ) {
         try {
             let fileIds = files ? files.split(',') : [];
-            if(!fileIds.length) 
+            if(!fileIds.length)
                 return { message: '请选择文件', code: 2 }
-            
+
             if(fileIds.length === 1) {
                 let id = fileIds[0];
                 const file = await this.fileService.getById(id);
-                if (!file) 
+                if (!file)
                     return { message: '找不到文件', code: 2 };
-                
+
                 const filePath = './' + id ;
                 const stat = getFileStat(filePath);
                 const type = getFileMime(file.name);
