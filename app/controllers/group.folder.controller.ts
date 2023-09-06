@@ -1,8 +1,26 @@
 import { GroupFolderService } from '../services';
-import { Body, BodyParam, Delete, Get, Param, Put, QueryParam, Session } from 'routing-controllers';
+import {
+  Body,
+  BodyParam,
+  Delete,
+  Get,
+  JsonController,
+  Param,
+  Post,
+  Put,
+  QueryParam,
+  Session,
+  UseBefore
+} from 'routing-controllers';
 import { GroupFolder } from '../entities/mysql';
 import { createRepeatName } from '../helpers';
+import { UserAuthMiddleware } from '../middlewares/userAuth';
 
+/**
+ * 团队目录接口管理
+ */
+@JsonController('/group/folder')
+@UseBefore(UserAuthMiddleware)
 export class GroupFolderController {
   private groupFolderService: GroupFolderService;
 
@@ -16,6 +34,7 @@ export class GroupFolderController {
    * @param parentId
    * @param groupId
    */
+  @Post()
   async create(
     @Body() folder: GroupFolder,
     @BodyParam('parentId') parentId: string,
