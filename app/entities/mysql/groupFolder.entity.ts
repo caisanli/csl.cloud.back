@@ -9,7 +9,4 @@ export class GroupFolder extends BaseFolder {
 
     @TreeChildren()
     children: GroupFolder[];
-
-    @TreeParent()
-    parent: GroupFolder;
 }
