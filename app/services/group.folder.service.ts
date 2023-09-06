@@ -27,7 +27,7 @@ export class GroupFolderService extends BaseService<GroupFolder> {
         id = parent ? parent.id : null;
         while(id !== '0' && id) {
             let folder = await this.repository.createQueryBuilder()
-                                    .where("folder.id = :id", { id })
+                                    .where("groupFolder.id = :id", { id })
                                     .getOne();
             folders.unshift(folder)
             id = folder.parentId;
@@ -42,7 +42,7 @@ export class GroupFolderService extends BaseService<GroupFolder> {
 
     getChildrenCount(id: string):Promise<number> {
         return this.repository.createQueryBuilder()
-            .where("folder.parentId = :id", { id })
+            .where("groupFolder.parentId = :id", { id })
             .getCount();
     }
 }
