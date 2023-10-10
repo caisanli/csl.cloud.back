@@ -36,6 +36,8 @@ sudo cp -R [文件夹地址] /usr/local
 
 ```bazaar
 sudo [mongodb路径]/bin/mongod --dbpath /usr/local/var/mongodb
+// fast start
+sudo ./mongod --dbpath /usr/local/var/mongodb
 ```
 
 [安装客户端](https://www.mongodb.com/try/download/compass)
