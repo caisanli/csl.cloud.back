@@ -1,14 +1,43 @@
-import { FileChunkEntity } from "app/entities/mongodb";
-import { File, Folder, User } from "app/entities/mysql";
-import { createFileHash, createUUID, twoDecimal } from "app/helpers";
-import { clearChunkDir, fileUploadOptions, mergeFile, getFileMimeType, removeFile, getCategory, copyFile, getFileStat, getFileMime, getFileBuffer, zip } from "app/helpers/upload";
-import { UserAuthMiddleware } from "app/middlewares/userAuth";
-import { FileChunkService, FilService, FolderService } from "app/services";
+import { FileChunkEntity } from 'app/entities/mongodb';
+import { File, Folder, User } from 'app/entities/mysql';
+import { createFileHash, createUUID, twoDecimal } from 'app/helpers';
+import {
+    clearChunkDir,
+    copyFile,
+    fileUploadOptions,
+    getCategory,
+    getFileBuffer,
+    getFileMime,
+    getFileMimeType,
+    getFileStat,
+    mergeFile,
+    removeFile,
+    zip
+} from 'app/helpers/upload';
+import { UserAuthMiddleware } from 'app/middlewares/userAuth';
+import { FileChunkService, FilService, FolderService } from 'app/services';
 
-import { ORDER, CATEGORY } from "app/types";
-import { Request } from "koa";
-import { Body, BodyParam, Ctx, Delete, Get, JsonController, OnUndefined, Param, Post, Put, QueryParam, Req, Res, Session, UploadedFile, UseBefore } from "routing-controllers";
-import { Context } from "vm";
+import { CATEGORY, ORDER } from 'app/types';
+import { Request } from 'koa';
+import {
+    Body,
+    BodyParam,
+    Ctx,
+    Delete,
+    Get,
+    JsonController,
+    OnUndefined,
+    Param,
+    Post,
+    Put,
+    QueryParam,
+    Req,
+    Session,
+    UploadedFile,
+    UseBefore
+} from 'routing-controllers';
+import { Context } from 'vm';
+
 @JsonController('/file')
 @UseBefore(UserAuthMiddleware)
 export class FileController {
@@ -89,12 +118,7 @@ export class FileController {
      * @param folderId
      */
     @Post("/upload")
-    async upload(
-        @Session() session: any,
-        @UploadedFile('file', {
-            options: fileUploadOptions,
-            required: true
-        }) file: any,
+    async upload(@Session() session: any, @UploadedFile('file', { options: fileUploadOptions, required: true }) file: any,
         @Body({
             required: true
         }) bodyFile: FileChunkEntity,
@@ -105,14 +129,7 @@ export class FileController {
         const { name, size, modifyDate, chunk, chunks } = bodyFile;
         const hashVal = createFileHash(name, size, modifyDate);
         const user = session.user as User;
-        let data: {
-            process: number,
-            uploaded: boolean
-        } = {
-            process: 0,
-            uploaded: false
-        };
-
+        let data: { process: number, uploaded: boolean } = { process: 0, uploaded: false };
         // 查询文件夹
         if (folderId !== '0') {
             let folder = await this.folderService.getById(folderId);
@@ -130,8 +147,7 @@ export class FileController {
             // 初始化文件
             let file = new File();
             let fileId: string = createUUID(name + Date.now());
-            let diskFileName: string = fileId; // + (extname ? '.' + extname : '');
-            mergeFile(hashVal, diskFileName, name);
+            mergeFile(hashVal, fileId, name);
             file.id = fileId;
             file.name = name;
             file.size = size;
@@ -156,7 +172,6 @@ export class FileController {
     }
 
     /**
-     *
      * 获取文件分片上传进度
      * @param {string} name
      * @param {number} size
@@ -164,25 +179,7 @@ export class FileController {
      * @returns
      * @memberof FileController
      */
-    @Post('/chunk/process')
-    async getChunkProcess(
-        @BodyParam('name', {
-            required: true
-        }) name: string,
-        @BodyParam('size', {
-            required: true
-        }) size: number,
-        @BodyParam('modifyDate', {
-            required: true
-        }) modifyDate: number
-    ) {
-        const query = new FileChunkEntity();
-        const hashVal = createFileHash(name, size, modifyDate);
-        query._id = hashVal;
-        query.id = hashVal;
-        const chunkFiles = await this.fileChunkService.find(query);
-        return { message: '获取成功', data: chunkFiles[0], code: 1 }
-    }
+    name
 
     /**
      * 更新文件
@@ -363,10 +360,12 @@ export class FileController {
                 return ;
             }
             const filePath = './' + id ;
+            // 获取文件信息
             const stat = getFileStat(filePath);
             const range: string = req.headers.range;
             const type = getFileMime(file.name);
             if (!range) {
+                // 获取文件buffer
                 const fileBuffer = await getFileBuffer(filePath, { start: 0, end: stat.size - 1 });
                 ctx.type = type;
                 ctx.body = fileBuffer;

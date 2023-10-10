@@ -14,9 +14,11 @@ export class UserController {
 
     /**
      * 创建用户
-     * @param {User} user
      * @returns
      * @memberof UserController
+     * @param name
+     * @param phone
+     * @param email
      */
     @Post()
     @UseBefore(AdminAuthMiddleware)
@@ -33,12 +35,12 @@ export class UserController {
         user.phone = phone;
         user.email = email;
         const errors = await UserController.validate(user);
-        if(errors.length) 
+        if(errors.length)
             return {message: errors[0].message, code: 2};
         await this.userService.create(user);
         return  {message: '保存成功', code: 1};
     }
-    
+
     /**
      * 更新用户信息
      * @param {string} id
@@ -51,7 +53,7 @@ export class UserController {
     @Put('/:id')
     @UseBefore(AdminAuthMiddleware)
     async update(
-        @Param('id') id: string, 
+        @Param('id') id: string,
         @BodyParam('name', {
             required: true
         }) name: string,
@@ -59,13 +61,13 @@ export class UserController {
         @BodyParam('email') email: string
     ) {
         const user = await this.userService.getById(id);
-        if(!user) 
+        if(!user)
             return {message: '当前用户不存在', code: 2}
         user.name = name;
         user.phone = phone;
         user.email = email;
         const errors = await UserController.validate(user, true);
-        if(errors.length) 
+        if(errors.length)
             return {message: errors[0].message, code: 2};
         await this.userService.update(id, user);
         return  {message: '保存成功', code: 1};
@@ -73,6 +75,7 @@ export class UserController {
 
     /**
      * 更新用户密码
+     * @param id
      * @param {string} oldPwd
      * @param {string} newPwd
      * @memberof UserController
@@ -89,17 +92,17 @@ export class UserController {
     ) {
         const user = await this.userService.getPasswordUserById(id);
         if(!user) return { message: '用户不存在', code: 2 }
-        
-        if( md5(oldPwd) !== user.password) 
+
+        if( md5(oldPwd) !== user.password)
             return { message: '旧密码有误', code: 2 }
         user.password = newPwd;
         const errors = await UserController.validate(user);
-        if(errors.length) 
+        if(errors.length)
             return { message: errors[0].message, code: 2 }
         user.password = md5(user.password);
         await this.userService.update(id, user);
         return { message: '更新密码成功', code: 1 }
-    }   
+    }
 
     /**
      * 查询用户列表（可根据名称模糊查询
@@ -115,7 +118,7 @@ export class UserController {
         const result = await this.userService.query(name);
         return {message: '获取成功', data: result, code: 1};
     }
-    
+
     /**
      * 删除用户
      * @param {string} id
@@ -126,7 +129,7 @@ export class UserController {
     @UseBefore(AdminAuthMiddleware)
     async remove(@Param('id') id: string) {
         const oldUser = await this.userService.getById(id);
-        if(!oldUser) 
+        if(!oldUser)
             return {message: '当前用户不存在', code: 2}
         await this.userService.remove(id);
         return { message: '删除成功', code: 1 };
@@ -146,7 +149,7 @@ export class UserController {
 
     /**
      * 根据ID查询带密码的用户
-     * @param id 
+     * @param id
      */
     // @Get('/password/:id')
     async getPassword(@Param('id') id: string) {
@@ -156,7 +159,7 @@ export class UserController {
 
     static validate(user: User, isUpdate?: boolean): Promise<any []> {
         const { name, password, phone, email } = user;
-        const errors = [], 
+        const errors = [],
             pswReg = /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? ]).*$/,
             phoneReg = /^1[\d]{10}$/,
             emailReg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
